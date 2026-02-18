@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv
+env/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Environment Variables
+.env
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Migration Artifacts - Runtime Data
+# checkpoints/
+# reports/
+# stats/
+
+# Migration Artifacts - Generated Code/Specs
+# (Uncomment if you want to track these in git)
+# schemas/
+# ddl/
+# mappings/draft/
+
+# Logs
+*.log

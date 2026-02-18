@@ -1,0 +1,621 @@
+{
+  "validated_at": "2026-02-18T00:14:48.191327+00:00",
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "tables": [
+    {
+      "source_table": "public.content_details_base",
+      "target_table": "Bi_doctor_db.content_details_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 1042,
+          "target": 1042,
+          "pass": true
+        },
+        {
+          "check": "L3_DISTINCT",
+          "column": "item_luid",
+          "source": 1042,
+          "target": 1042,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "last_accessed_at",
+          "source": "2025-11-10 11:15:51",
+          "target": "2025-11-10 11:15:51",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "last_accessed_at",
+          "source": "2026-02-08 03:03:56",
+          "target": "2026-02-08 03:03:56",
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "total_size_mb",
+          "source": "221.241493",
+          "target": "210",
+          "pass": false
+        },
+        {
+          "check": "L2_MIN",
+          "column": "total_size_mb",
+          "source": "0.0",
+          "target": "0",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "total_size_mb",
+          "source": "40.646226",
+          "target": "41",
+          "pass": false
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-09 22:59:36.160213",
+          "target": "2026-02-09 22:59:36",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-09 22:59:36.160213",
+          "target": "2026-02-09 22:59:36",
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "source_table": "public.custom_query_details_base",
+      "target_table": "Bi_doctor_db.custom_query_details_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 1,
+          "target": 1,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "project_id",
+          "source": "697727",
+          "target": "697727",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "project_id",
+          "source": "697727",
+          "target": "697727",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "project_id",
+          "source": "697727",
+          "target": "697727",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-11 07:11:35.456316",
+          "target": "2026-02-11 07:11:35",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 07:11:35.456316",
+          "target": "2026-02-11 07:11:35",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "source_table": "public.custom_query_details_hist",
+      "target_table": "Bi_doctor_db.custom_query_details_hist",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 1,
+          "target": 1,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-11 07:11:35.456316",
+          "target": "2026-02-11 07:11:35",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 07:11:35.456316",
+          "target": "2026-02-11 07:11:35",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "source_table": "public.dashboard_details_base",
+      "target_table": "Bi_doctor_db.dashboard_details_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 8172,
+          "target": 8172,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "row_id",
+          "source": "2573930754",
+          "target": "2573930754",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "row_id",
+          "source": "310884",
+          "target": "310884",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "row_id",
+          "source": "319055",
+          "target": "319055",
+          "pass": true
+        },
+        {
+          "check": "L3_DISTINCT",
+          "column": "row_id",
+          "source": 8172,
+          "target": 8172,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "project_id",
+          "source": "5676564029",
+          "target": "5676564029",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "project_id",
+          "source": "575799",
+          "target": "575799",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "project_id",
+          "source": "877046",
+          "target": "877046",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-09 20:43:19.582000",
+          "target": "2026-02-09 20:43:20",
+          "pass": false
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "source_table": "public.dashboard_details_hist",
+      "target_table": "Bi_doctor_db.dashboard_details_hist",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 12624,
+          "target": 12624,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-07 15:06:04",
+          "target": "2026-02-07 15:06:04",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "source_table": "public.datasource_details_base",
+      "target_table": "Bi_doctor_db.datasource_details_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 3926,
+          "target": 3926,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "row_id",
+          "source": "1026411477",
+          "target": "1026411477",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "row_id",
+          "source": "259477",
+          "target": "259477",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "row_id",
+          "source": "263402",
+          "target": "263402",
+          "pass": true
+        },
+        {
+          "check": "L3_DISTINCT",
+          "column": "row_id",
+          "source": 3926,
+          "target": 3926,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "wb_project_id",
+          "source": "2522061916",
+          "target": "2522061916",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "wb_project_id",
+          "source": "575799",
+          "target": "575799",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "wb_project_id",
+          "source": "1591017",
+          "target": "1591017",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "wb_created_date",
+          "source": "2024-03-27 08:54:52",
+          "target": "2024-03-27 08:54:52",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "wb_created_date",
+          "source": "2026-01-09 15:12:46",
+          "target": "2026-01-09 15:12:46",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "wb_updated_date",
+          "source": "2024-07-05 13:54:18",
+          "target": "2024-07-05 13:54:18",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "wb_updated_date",
+          "source": "2026-01-10 14:31:42",
+          "target": "2026-01-10 14:31:42",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "ds_created_date",
+          "source": "2024-03-27 08:54:52",
+          "target": "2024-03-27 08:54:52",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "ds_created_date",
+          "source": "2025-12-11 07:57:25",
+          "target": "2025-12-11 07:57:25",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "ds_updated_date",
+          "source": "2024-03-27 08:54:57",
+          "target": "2024-03-27 08:54:57",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "ds_updated_date",
+          "source": "2025-12-11 08:02:16",
+          "target": "2025-12-11 08:02:16",
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "ds_project_id",
+          "source": "390988037",
+          "target": "390988037",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "ds_project_id",
+          "source": "575799",
+          "target": "575799",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "ds_project_id",
+          "source": "765631",
+          "target": "765631",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-09 20:43:19.582000",
+          "target": "2026-02-09 20:43:20",
+          "pass": false
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "source_table": "public.datasource_details_hist",
+      "target_table": "Bi_doctor_db.datasource_details_hist",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 6116,
+          "target": 6116,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-07 15:06:04",
+          "target": "2026-02-07 15:06:04",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    {
+      "source_table": "public.event_details_base",
+      "target_table": "Bi_doctor_db.event_details_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 6172,
+          "target": 6172,
+          "pass": true
+        },
+        {
+          "check": "L3_DISTINCT",
+          "column": "event_id",
+          "source": 6172,
+          "target": 6172,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "event_date",
+          "source": "2025-11-03 00:12:00",
+          "target": "2025-11-03 00:12:00",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "event_date",
+          "source": "2026-02-01 08:25:11",
+          "target": "2026-02-01 08:25:11",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "sync_date",
+          "source": "2026-02-01 16:04:35",
+          "target": "2026-02-01 16:04:35",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "sync_date",
+          "source": "2026-02-01 16:04:35",
+          "target": "2026-02-01 16:04:35",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-05 03:01:15.994633",
+          "target": "2026-02-05 03:01:16",
+          "pass": false
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-05 03:01:15.994633",
+          "target": "2026-02-05 03:01:16",
+          "pass": false
+        }
+      ],
+      "pass": false
+    },
+    {
+      "source_table": "public.usage_statistics_base",
+      "target_table": "Bi_doctor_db.usage_statistics_base",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 87,
+          "target": 87,
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "project_id",
+          "source": "63344967",
+          "target": "63344967",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "project_id",
+          "source": "575799",
+          "target": "575799",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "project_id",
+          "source": "877046",
+          "target": "877046",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "created_at",
+          "source": "2024-03-27 08:54:52",
+          "target": "2024-03-27 08:54:52",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "created_at",
+          "source": "2025-12-11 07:57:25",
+          "target": "2025-12-11 07:57:25",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "updated_at",
+          "source": "2024-03-27 08:54:52",
+          "target": "2024-03-27 08:54:52",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "updated_at",
+          "source": "2025-12-11 07:57:25",
+          "target": "2025-12-11 07:57:25",
+          "pass": true
+        },
+        {
+          "check": "L2_SUM",
+          "column": "total_views",
+          "source": "1176",
+          "target": "1176",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "total_views",
+          "source": "0",
+          "target": "0",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "total_views",
+          "source": "250",
+          "target": "250",
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-09 20:43:19.582000",
+          "target": "2026-02-09 20:43:20",
+          "pass": false
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": false
+    },
+    {
+      "source_table": "public.usage_statistics_hist",
+      "target_table": "Bi_doctor_db.usage_statistics_hist",
+      "checks": [
+        {
+          "check": "L1_ROW_COUNT",
+          "source": 125,
+          "target": 125,
+          "pass": true
+        },
+        {
+          "check": "L2_MIN",
+          "column": "load_time",
+          "source": "2026-02-07 15:06:04",
+          "target": "2026-02-07 15:06:04",
+          "pass": true
+        },
+        {
+          "check": "L2_MAX",
+          "column": "load_time",
+          "source": "2026-02-11 09:46:10.304970",
+          "target": "2026-02-11 09:46:10",
+          "pass": true
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "all_pass": false
+}

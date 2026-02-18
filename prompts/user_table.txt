@@ -1,0 +1,8 @@
+Migrate the following source table. Respond with the JSON mapping only.
+
+Source engine: {source_engine}
+Target engine: {target_engine}
+Target schema: {target_schema}
+
+Table spec:
+{table_json}

@@ -1,0 +1,4 @@
+Most PostgreSQL types have direct canonical equivalents — straightforward mapping.
+Check SERIAL/IDENTITY columns (nextval in column_default) and translate to target auto-increment.
+JSONB → JSON canonical type. Prefer JSONB if target supports it (e.g. Postgres→Postgres).
+Arrays and custom types have no canonical equivalent — map to TEXT and add warning.

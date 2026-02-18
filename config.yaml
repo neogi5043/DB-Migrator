@@ -1,0 +1,51 @@
+source:
+  engine: postgres          # postgres | mssql — change to match your source
+  database: Bi_doctor_db
+  schema_filter: []         # Leave [] to include all schemas
+
+  # ── PostgreSQL source credentials ──
+  postgres:
+    host: ${SRC_PG_HOST}
+    port: ${SRC_PG_PORT}
+    database: ${SRC_PG_DB}
+    user: ${SRC_PG_USER}
+    password: ${SRC_PG_PASS}
+
+  # ── SQL Server / Azure SQL source credentials ──
+  mssql:
+    host: ${MSSQL_HOST}
+    port: ${MSSQL_PORT}
+    database: ${MSSQL_DB}
+    user: ${MSSQL_USER}
+    password: ${MSSQL_PASS}
+
+target:
+  engine: mysql
+  schema: Bi_doctor_db
+
+  mysql:
+    host: ${TGT_MYSQL_HOST}
+    port: ${TGT_MYSQL_PORT}
+    database: ${TGT_MYSQL_DB}
+    user: ${TGT_MYSQL_USER}
+    password: ${TGT_MYSQL_PASS}
+
+llm:
+  provider: azure_openai
+  azure_deployment: ${AZURE_OPENAI_DEPLOYMENT}
+  azure_endpoint: ${AZURE_OPENAI_ENDPOINT}
+  azure_api_key: ${AZURE_OPENAI_API_KEY}
+  azure_api_version: ${AZURE_OPENAI_API_VERSION}
+  temperature: 0
+  max_retries: 4
+  prompt_version: v1
+
+migration:
+  chunk_size: 100000
+  max_chunk_failures: 5
+  disable_fk_during_load: true
+
+validation:
+  row_count_tolerance: 0.0
+  sample_rows: 1000
+  float_tolerance: 0.0001

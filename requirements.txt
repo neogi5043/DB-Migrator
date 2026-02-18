@@ -1,0 +1,25 @@
+# Core dependencies
+pyyaml>=6.0
+jinja2>=3.1
+pydantic>=2.0
+python-dotenv>=1.0
+
+# LLM - Azure OpenAI via LangChain
+langchain>=0.3.0
+langchain-openai>=0.3.0
+langchain-core>=0.3.0
+
+# --- Source Drivers (install only those you need) ---
+# pip install teradatasql           # Teradata source
+# pip install cx_Oracle             # Oracle source (or oracledb)
+# pip install pyodbc                # SQL Server / Azure Synapse source
+# pip install mysql-connector-python  # MySQL / MariaDB source
+# pip install psycopg2-binary       # PostgreSQL source & target
+
+# --- Target Drivers ---
+# pip install snowflake-connector-python  # Snowflake target
+# pip install google-cloud-bigquery       # BigQuery target
+# pip install google-cloud-storage        # BigQuery bulk load (GCS staging)
+psycopg2-binary
+pyodbc
+mysql-connector-python

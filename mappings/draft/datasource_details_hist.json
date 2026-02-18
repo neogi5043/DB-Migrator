@@ -1,0 +1,431 @@
+{
+  "source_table": "public.datasource_details_hist",
+  "target_table": "target_db.datasource_details_hist",
+  "columns": [
+    {
+      "source": "wb_project_id",
+      "target": "wb_project_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_project",
+      "target": "wb_project",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_id",
+      "target": "workbook_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_luid",
+      "target": "workbook_luid",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook",
+      "target": "workbook",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_created_date",
+      "target": "wb_created_date",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_updated_date",
+      "target": "wb_updated_date",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_tags",
+      "target": "wb_tags",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "description",
+      "target": "description",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_id",
+      "target": "datasource_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource",
+      "target": "datasource",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_created_date",
+      "target": "ds_created_date",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_updated_date",
+      "target": "ds_updated_date",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_project_id",
+      "target": "ds_project_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_project",
+      "target": "ds_project",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_tags",
+      "target": "ds_tags",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "contains_extract",
+      "target": "contains_extract",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_type",
+      "target": "datasource_type",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_id",
+      "target": "field_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_name",
+      "target": "field_name",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_type",
+      "target": "field_type",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "formula",
+      "target": "formula",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "table",
+      "target": "table",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "column",
+      "target": "column",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet_id",
+      "target": "sheet_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet",
+      "target": "sheet",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "used_in_sheet",
+      "target": "used_in_sheet",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard_id",
+      "target": "dashboard_id",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard",
+      "target": "dashboard",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "custom_query",
+      "target": "custom_query",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "flag",
+      "target": "flag",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "file_name",
+      "target": "file_name",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "load_time",
+      "target": "load_time",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_luid",
+      "target": "datasource_luid",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    }
+  ],
+  "primary_key": [],
+  "foreign_keys": [],
+  "indexes": [
+    {
+      "name": "idx_datasource_details_hist_latest",
+      "unique": false,
+      "columns": [
+        "wb_project_id",
+        "workbook_id",
+        "datasource_id",
+        "ds_project_id",
+        "field_id",
+        "sheet_id",
+        "dashboard_id",
+        "load_time"
+      ]
+    },
+    {
+      "name": "idx_datasource_hist_load_time",
+      "unique": false,
+      "columns": [
+        "load_time"
+      ]
+    },
+    {
+      "name": "idx_ds_hist_fast",
+      "unique": false,
+      "columns": [
+        "wb_project_id",
+        "workbook_id",
+        "datasource_id",
+        "ds_project_id",
+        "field_id",
+        "sheet_id",
+        "dashboard_id",
+        "load_time"
+      ]
+    },
+    {
+      "name": "idx_hist_load_time",
+      "unique": false,
+      "columns": [
+        "load_time"
+      ]
+    }
+  ],
+  "warnings": [],
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "status": "draft",
+  "prompt_version": "v1"
+}

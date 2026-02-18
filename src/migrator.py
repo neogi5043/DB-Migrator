@@ -1,0 +1,188 @@
+"""
+Migrator — chunked extract-transform-load with checkpoint resume.
+
+Uses OFFSET/LIMIT chunking so it works with any PK type (text, UUID, int).
+"""
+from __future__ import annotations
+
+import json
+import logging
+from datetime import datetime, timezone
+from pathlib import Path
+
+from src.connectors.base import SourceConnector, TargetConnector
+from src.utils import ROOT_DIR, ensure_dirs, generate_run_id
+
+log = logging.getLogger(__name__)
+
+CHECKPOINT_DIR = ROOT_DIR / "checkpoints"
+
+
+def _checkpoint_path(run_id: str, table: str) -> Path:
+    d = CHECKPOINT_DIR / run_id
+    d.mkdir(parents=True, exist_ok=True)
+    return d / f"{table}.json"
+
+
+def _load_checkpoint(run_id: str, table: str) -> int:
+    """Return the last completed offset, or 0 if none."""
+    p = _checkpoint_path(run_id, table)
+    if p.exists():
+        data = json.loads(p.read_text())
+        return data.get("last_offset", 0)
+    return 0
+
+
+def _save_checkpoint(run_id: str, table: str, last_offset: int, rows_loaded: int) -> None:
+    p = _checkpoint_path(run_id, table)
+    p.write_text(json.dumps({
+        "table": table, "last_offset": last_offset,
+        "rows_loaded": rows_loaded,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }))
+
+
+def _apply_transforms(rows: list[dict], columns: list[dict]) -> list[dict]:
+    """Apply Python-side type coercions per the mapping spec."""
+    for row in rows:
+        for col in columns:
+            name = col.get("target", col.get("source", ""))
+            src_name = col.get("source", name)
+            if src_name not in row:
+                continue
+            val = row[src_name]
+
+            # LOB objects
+            if hasattr(val, "read"):
+                val = val.read()
+
+            # Decimal → float
+            if hasattr(val, "as_integer_ratio") and not isinstance(val, (int, float)):
+                val = float(val)
+
+            # Dict (JSONB) → string
+            if isinstance(val, dict):
+                val = json.dumps(val)
+
+            # Bool coercion for BOOL canonical
+            canonical = col.get("canonical_type", "")
+            if canonical == "BOOL" and isinstance(val, int):
+                val = bool(val)
+
+            # Remap source col name → target col name
+            if src_name != name:
+                del row[src_name]
+            row[name] = val
+    return rows
+
+
+def migrate_table(
+    source: SourceConnector,
+    target: TargetConnector,
+    config: dict,
+    mapping: dict,
+    run_id: str,
+) -> dict:
+    """Migrate a single table in chunks using OFFSET/LIMIT."""
+    src_cfg = config["source"]
+    mig_cfg = config.get("migration", {})
+    chunk_size = mig_cfg.get("chunk_size", 100_000)
+    max_failures = mig_cfg.get("max_chunk_failures", 5)
+    disable_fk = mig_cfg.get("disable_fk_during_load", True)
+
+    database = src_cfg["database"]
+    src_table_fqn = mapping.get("source_table", "")
+    schema = src_table_fqn.split(".")[0] if "." in src_table_fqn else ""
+    table = src_table_fqn.split(".")[-1]
+    target_table = mapping.get("target_table", table)
+    target_schema = config["target"].get("schema", "public")
+    fqn_target = f"{target_schema}.{target_table}"
+
+    columns = mapping.get("columns", [])
+
+    log.info("Migrating %s.%s → %s (chunk=%d)",
+             schema, table, fqn_target, chunk_size)
+
+    if disable_fk:
+        try:
+            target.disable_fk_constraints(fqn_target)
+        except Exception as e:
+            log.warning("FK disable failed (may be fine): %s", e)
+
+    total_loaded = 0
+    failures = 0
+    offset = _load_checkpoint(run_id, target_table)
+
+    while True:
+        try:
+            rows = source.extract_chunk(
+                database, schema, table, columns,
+                None, None, offset, chunk_size
+            )
+        except Exception as e:
+            log.error("Extract failed at offset %d: %s", offset, e)
+            failures += 1
+            if failures >= max_failures:
+                log.error("Max failures reached for %s — stopping", table)
+                break
+            offset += chunk_size
+            continue
+
+        if not rows:
+            log.info("No more rows at offset=%d — %s complete (%d rows)",
+                     offset, table, total_loaded)
+            break
+
+        rows = _apply_transforms(rows, columns)
+        target_cols = [c.get("target", c.get("source")) for c in columns]
+
+        try:
+            loaded = target.bulk_load(fqn_target, target_cols, rows)
+            total_loaded += loaded
+            offset += len(rows)
+            _save_checkpoint(run_id, target_table, offset, total_loaded)
+            log.info("  offset %d: %d rows loaded (total %d)",
+                     offset, loaded, total_loaded)
+        except Exception as e:
+            log.error("Load failed at offset %d: %s", offset, e)
+            failures += 1
+            if failures >= max_failures:
+                log.error("Max failures reached for %s — stopping", table)
+                break
+            offset += len(rows)
+
+    if disable_fk:
+        try:
+            target.enable_fk_constraints(fqn_target)
+        except Exception:
+            pass
+
+    return {"table": target_table, "rows_loaded": total_loaded,
+            "failures": failures, "run_id": run_id}
+
+
+def migrate_all(
+    source: SourceConnector,
+    target: TargetConnector,
+    config: dict,
+    run_id: str | None = None,
+    tables_filter: list[str] | None = None,
+) -> list[dict]:
+    """Migrate all approved tables (or a filtered subset)."""
+    ensure_dirs()
+    run_id = run_id or generate_run_id()
+    log.info("Migration run: %s", run_id)
+
+    approved_dir = ROOT_DIR / "mappings" / "approved"
+    results = []
+
+    for mf in sorted(approved_dir.glob("*.json")):
+        mapping = json.loads(mf.read_text(encoding="utf-8"))
+        src_table = mapping.get("source_table", mf.stem)
+        if tables_filter and src_table not in tables_filter:
+            continue
+        result = migrate_table(source, target, config, mapping, run_id)
+        results.append(result)
+
+    log.info("Migration complete. %d tables processed.", len(results))
+    return results

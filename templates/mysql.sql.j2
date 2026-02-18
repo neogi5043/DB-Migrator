@@ -1,0 +1,16 @@
+{# MySQL target DDL template — backtick identifiers, InnoDB, utf8mb4 #}
+
+{% set tbl = mapping.target_table %}
+CREATE TABLE IF NOT EXISTS `{{ schema }}`.`{{ tbl }}` (
+{% for col in mapping.columns %}
+    `{{ col.target }}` {{ col.target_type }}{% if not col.nullable %} NOT NULL{% endif %}{% if col.auto_increment is defined and col.auto_increment %} AUTO_INCREMENT{% endif %}{% if not loop.last or mapping.primary_key %},{% endif %}
+
+{% endfor %}
+{% if mapping.primary_key %}
+    PRIMARY KEY ({% for pk in mapping.primary_key %}`{{ pk }}`{% if not loop.last %}, {% endif %}{% endfor %})
+{% endif %}
+) ENGINE={{ mapping.mysql_engine | default('InnoDB') }} DEFAULT CHARSET={{ mapping.mysql_charset | default('utf8mb4') }};
+
+{% for idx in mapping.indexes | default([]) %}
+CREATE {% if idx.unique %}UNIQUE {% endif %}INDEX `{{ idx.name }}` ON `{{ schema }}`.`{{ tbl }}` ({% for c in idx.columns %}`{{ c }}`{% if not loop.last %}, {% endif %}{% endfor %});
+{% endfor %}

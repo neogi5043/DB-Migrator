@@ -1,0 +1,148 @@
+{
+  "source_table": "public.event_details_base",
+  "target_table": "target_db.event_details_base",
+  "columns": [
+    {
+      "source": "event_id",
+      "target": "event_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "primary_key",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "event_date",
+      "target": "event_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "event_type",
+      "target": "event_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(30)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "event_name",
+      "target": "event_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(30)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_type",
+      "target": "item_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(20)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_name",
+      "target": "item_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_luid",
+      "target": "item_luid",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "user_id",
+      "target": "user_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "user_name",
+      "target": "user_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "user_role",
+      "target": "user_role",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(30)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sync_date",
+      "target": "sync_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "load_time",
+      "target": "load_time",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    }
+  ],
+  "primary_key": [
+    "event_id"
+  ],
+  "foreign_keys": [],
+  "indexes": [],
+  "warnings": [],
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "status": "draft",
+  "prompt_version": "v1"
+}

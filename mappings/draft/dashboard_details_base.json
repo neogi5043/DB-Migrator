@@ -1,0 +1,289 @@
+{
+  "source_table": "public.dashboard_details_base",
+  "target_table": "target_db.dashboard_details_base",
+  "columns": [
+    {
+      "source": "row_id",
+      "target": "row_id",
+      "source_type_raw": "bigint",
+      "canonical_type": "INT8",
+      "target_type": "BIGINT",
+      "role": "primary_key",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "project_id",
+      "target": "project_id",
+      "source_type_raw": "bigint",
+      "canonical_type": "INT8",
+      "target_type": "BIGINT",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "project",
+      "target": "project",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_id",
+      "target": "workbook_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook",
+      "target": "workbook",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(250)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_owner_id",
+      "target": "workbook_owner_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_owner_username",
+      "target": "workbook_owner_username",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard_id",
+      "target": "dashboard_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard",
+      "target": "dashboard",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet_id",
+      "target": "sheet_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet",
+      "target": "sheet",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_id",
+      "target": "field_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field",
+      "target": "field",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_type",
+      "target": "field_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_id",
+      "target": "datasource_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource",
+      "target": "datasource",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "table_name",
+      "target": "table_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "column_name",
+      "target": "column_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "formula",
+      "target": "formula",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "file_name",
+      "target": "file_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "load_time",
+      "target": "load_time",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    }
+  ],
+  "primary_key": [
+    "row_id"
+  ],
+  "foreign_keys": [],
+  "indexes": [
+    {
+      "name": "idx_dash_wb",
+      "unique": false,
+      "columns": [
+        "workbook_id"
+      ]
+    },
+    {
+      "name": "idx_dash_wb_ds",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id"
+      ]
+    },
+    {
+      "name": "idx_dash_wb_ds_col",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id",
+        "column_name"
+      ]
+    },
+    {
+      "name": "idx_dash_wb_ds_table",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id",
+        "table_name"
+      ]
+    },
+    {
+      "name": "idx_dash_wb_field",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "field_id"
+      ]
+    }
+  ],
+  "warnings": [],
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "status": "draft",
+  "prompt_version": "v1"
+}

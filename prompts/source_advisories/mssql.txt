@@ -1,0 +1,6 @@
+VARCHAR is non-Unicode (Latin-1 by default); NVARCHAR is Unicode — map to TEXT vs NTEXT canonical types accordingly.
+MONEY → DECIMAL(19,4) and SMALLMONEY → DECIMAL(10,4).
+DATETIME2 precision (0–7) must be preserved in the scale field.
+BIT is 0/1 — map to canonical BOOL.
+IDENTITY columns (sys.columns.is_identity=1) → translate to target SERIAL/IDENTITY.
+Computed columns (sys.columns.is_computed=1) — note in spec, do not attempt to replicate expression.

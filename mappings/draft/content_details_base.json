@@ -1,0 +1,150 @@
+{
+  "source_table": "public.content_details_base",
+  "target_table": "target_db.content_details_base",
+  "columns": [
+    {
+      "source": "item_luid",
+      "target": "item_luid",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "primary_key",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_id",
+      "target": "item_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_name",
+      "target": "item_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_type",
+      "target": "item_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(20)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_parent_project_name",
+      "target": "item_parent_project_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_parent_project_id",
+      "target": "item_parent_project_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "top_parent_project_name",
+      "target": "top_parent_project_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "last_accessed_at",
+      "target": "last_accessed_at",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "owner_email",
+      "target": "owner_email",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "item_hyperlink",
+      "target": "item_hyperlink",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "total_size_mb",
+      "target": "total_size_mb",
+      "source_type_raw": "numeric",
+      "canonical_type": "DECIMAL",
+      "target_type": "DECIMAL",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": [
+        "Source numeric type has unspecified precision and scale; mapped to DECIMAL without precision and scale which may cause differences."
+      ]
+    },
+    {
+      "source": "load_time",
+      "target": "load_time",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    }
+  ],
+  "primary_key": [
+    "item_luid"
+  ],
+  "foreign_keys": [],
+  "indexes": [],
+  "warnings": [],
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "status": "draft",
+  "prompt_version": "v1"
+}
