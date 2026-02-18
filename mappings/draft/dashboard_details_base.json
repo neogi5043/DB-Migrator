@@ -1,6 +1,6 @@
 {
   "source_table": "public.dashboard_details_base",
-  "target_table": "target_db.dashboard_details_base",
+  "target_table": "Bi_doctor_db.dashboard_details_base",
   "columns": [
     {
       "source": "row_id",
@@ -227,7 +227,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -281,7 +281,9 @@
       ]
     }
   ],
-  "warnings": [],
+  "warnings": [
+    "Column 'row_id' is SERIAL/IDENTITY in Postgres; map to BIGINT with auto-increment in MySQL."
+  ],
   "source_engine": "postgres",
   "target_engine": "mysql",
   "status": "draft",

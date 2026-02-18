@@ -100,3 +100,34 @@ def generate_mapping(
              mapping.get("source_table"), target_schema,
              mapping.get("target_table"), len(mapping.get("columns", [])))
     return mapping
+
+
+def translate_sql(
+    llm: AzureChatOpenAI,
+    source_engine: str,
+    target_engine: str,
+    sql_code: str,
+    object_type: str,
+    object_name: str = "your_object_name",
+) -> str:
+    """Translate SQL code (view/proc) to target dialect."""
+    prompt_path = PROMPTS_DIR / "translate_sql.txt"
+    if not prompt_path.exists():
+        raise FileNotFoundError(f"Prompt not found: {prompt_path}")
+
+    template = prompt_path.read_text(encoding="utf-8")
+    text = template.format(
+        source_engine=source_engine,
+        target_engine=target_engine,
+        sql_code=sql_code,
+        object_type=object_type,
+        object_name=object_name,
+    )
+
+    # We want raw text, not JSON
+    messages = [HumanMessage(content=text)]
+    llm_text = llm.bind(response_format={"type": "text"})
+    
+    log.info("Translating %s: %s (%s → %s)", object_type, object_name, source_engine, target_engine)
+    response = llm_text.invoke(messages)
+    return response.content.strip()

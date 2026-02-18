@@ -1,6 +1,6 @@
 {
   "source_table": "public.custom_query_details_hist",
-  "target_table": "custom_query_details_hist",
+  "target_table": "bi_doctor_db.custom_query_details_hist",
   "columns": [
     {
       "source": "project_id",

@@ -1,13 +1,13 @@
 {
   "source_table": "public.datasource_details_base",
-  "target_table": "target_db.datasource_details_base",
+  "target_table": "bi_doctor_db.datasource_details_base",
   "columns": [
     {
       "source": "row_id",
       "target": "row_id",
       "source_type_raw": "bigint",
       "canonical_type": "INT8",
-      "target_type": "BIGINT AUTO_INCREMENT",
+      "target_type": "BIGINT",
       "role": "primary_key",
       "nullable": false,
       "transform": null,
@@ -73,7 +73,7 @@
       "target": "wb_created_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -84,7 +84,7 @@
       "target": "wb_updated_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -139,7 +139,7 @@
       "target": "ds_created_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -150,7 +150,7 @@
       "target": "ds_updated_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -370,7 +370,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": false,
       "transform": null,
@@ -440,7 +440,9 @@
       ]
     }
   ],
-  "warnings": [],
+  "warnings": [
+    "Column 'row_id' is SERIAL/IDENTITY in Postgres; map to BIGINT with auto-increment in MySQL."
+  ],
   "source_engine": "postgres",
   "target_engine": "mysql",
   "status": "draft",

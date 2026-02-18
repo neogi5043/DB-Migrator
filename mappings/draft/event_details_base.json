@@ -1,6 +1,6 @@
 {
   "source_table": "public.event_details_base",
-  "target_table": "target_db.event_details_base",
+  "target_table": "bi_doctor_db.event_details_base",
   "columns": [
     {
       "source": "event_id",
@@ -18,7 +18,7 @@
       "target": "event_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -117,7 +117,7 @@
       "target": "sync_date",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -128,7 +128,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,

@@ -1,0 +1,25 @@
+You are an expert database engineer.
+Your task is to translate a **{object_type}** definition from **{source_engine}** to **{target_engine}**.
+The object name is: **{object_name}**. Use *exactly* this name in your CREATE statement.
+**Do NOT include a schema prefix** (e.g., use `view_name`, NOT `public.view_name`).
+**Use `CREATE OR REPLACE VIEW`** (for views) to ensure idempotency.
+
+## Source Code ({source_engine})
+
+```sql
+{sql_code}
+```
+
+## Target Engine ({target_engine})
+
+Please adhere to the syntax and best practices of {target_engine}.
+- For MySQL, do NOT use `DELIMITER` commands. The code will be executed programmatically.
+- Ensure data types are converted correctly.
+- Handle engine-specific functions (e.g., `NOW()` vs `GETDATE()`, string concatenation).
+
+## Output Format
+
+Return ONLY the valid SQL code for the target engine.
+- Do NOT wrap in markdown code blocks.
+- Do NOT add explanations.
+- Just the raw SQL code ready to be executed.

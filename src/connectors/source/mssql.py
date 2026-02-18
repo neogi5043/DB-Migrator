@@ -217,3 +217,21 @@ class MSSQLSourceConnector(SourceConnector):
     def close(self) -> None:
         if self.conn:
             self.conn.close()
+
+    def list_routines(self, database: str, schema: str) -> list[dict]:
+        return []  # Not implemented for MSSQL yet
+
+    def get_routine_definition(self, database: str, schema: str, name: str) -> str:
+        return ""
+
+    def list_views(self, database: str, schema: str) -> list[dict]:
+        return []
+
+    def get_view_definition(self, database: str, schema: str, name: str) -> str:
+        return ""
+
+    def list_triggers(self, database: str, schema: str) -> list[dict]:
+        return []
+
+    def get_trigger_definition(self, database: str, schema: str, name: str, table: str) -> str:
+        return ""

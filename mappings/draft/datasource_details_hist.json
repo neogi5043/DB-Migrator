@@ -1,6 +1,6 @@
 {
   "source_table": "public.datasource_details_hist",
-  "target_table": "target_db.datasource_details_hist",
+  "target_table": "Bi_doctor_db.datasource_details_hist",
   "columns": [
     {
       "source": "wb_project_id",
@@ -359,7 +359,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": false,
       "transform": null,

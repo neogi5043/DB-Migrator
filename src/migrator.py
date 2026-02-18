@@ -96,7 +96,13 @@ def migrate_table(
     table = src_table_fqn.split(".")[-1]
     target_table = mapping.get("target_table", table)
     target_schema = config["target"].get("schema", "public")
-    fqn_target = f"{target_schema}.{target_table}"
+    
+    # Strip existing schema if present and enforce target_schema
+    if "." in target_table:
+        _, tbl_name = target_table.split(".", 1)
+        fqn_target = f"{target_schema}.{tbl_name}"
+    else:
+        fqn_target = f"{target_schema}.{target_table}"
 
     columns = mapping.get("columns", [])
 
@@ -145,6 +151,8 @@ def migrate_table(
                      offset, loaded, total_loaded)
         except Exception as e:
             log.error("Load failed at offset %d: %s", offset, e)
+            import traceback
+            traceback.print_exc()
             failures += 1
             if failures >= max_failures:
                 log.error("Max failures reached for %s — stopping", table)

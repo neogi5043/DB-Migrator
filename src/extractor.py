@@ -66,7 +66,84 @@ def extract_schema(source: SourceConnector, config: dict) -> Path:
     out_path = ROOT_DIR / "schemas" / f"{database}.json"
     out_path.write_text(json.dumps(spec, indent=2, default=str), encoding="utf-8")
     log.info("Schema written to %s", out_path)
+    
+    # Also extract views and routines
+    extract_views(source, config)
+    extract_routines(source, config)
+    extract_triggers(source, config)
+    
     return out_path
+
+
+def extract_views(source: SourceConnector, config: dict) -> None:
+    """Extract view definitions from the source database."""
+    src_cfg = config["source"]
+    database = src_cfg["database"]
+    schemas = src_cfg.get("schema_filter", [])
+    if not schemas:
+        schemas = ["public"]
+
+    log.info("Extracting views... %s", schemas)
+    views_dir = ROOT_DIR / "schemas" / "views"
+    views_dir.mkdir(parents=True, exist_ok=True)
+
+    for schema in schemas:
+        views = source.list_views(database, schema)
+        for v in views:
+            name = v["name"]
+            log.info("  ► View: %s.%s", schema, name)
+            definition = source.get_view_definition(database, schema, name)
+            if definition:
+                out_file = views_dir / f"{schema}.{name}.sql"
+                out_file.write_text(definition, encoding="utf-8")
+
+
+def extract_routines(source: SourceConnector, config: dict) -> None:
+    """Extract routine (function/procedure) definitions."""
+    src_cfg = config["source"]
+    database = src_cfg["database"]
+    schemas = src_cfg.get("schema_filter", [])
+    if not schemas:
+        schemas = ["public"]
+
+    log.info("Extracting routines... %s", schemas)
+    routines_dir = ROOT_DIR / "schemas" / "routines"
+    routines_dir.mkdir(parents=True, exist_ok=True)
+
+    for schema in schemas:
+        routines = source.list_routines(database, schema)
+        for r in routines:
+            name = r["name"]
+            rtype = r["type"]
+            log.info("  ► %s: %s.%s", rtype, schema, name)
+            definition = source.get_routine_definition(database, schema, name)
+            if definition:
+                out_file = routines_dir / f"{schema}.{name}.sql"
+                out_file.write_text(definition, encoding="utf-8")
+
+
+def extract_triggers(source: SourceConnector, config: dict) -> None:
+    """Extract trigger definitions."""
+    src_cfg = config["source"]
+    database = src_cfg["database"]
+    schemas = src_cfg.get("schema_filter", [])
+    if not schemas:
+        schemas = ["public"]
+
+    log.info("Extracting triggers... %s", schemas)
+    triggers_dir = ROOT_DIR / "schemas" / "triggers"
+    triggers_dir.mkdir(parents=True, exist_ok=True)
+
+    for schema in schemas:
+        triggers = source.list_triggers(database, schema)
+        for t in triggers:
+            name = t["name"]
+            table = t["table"]
+            log.info("  ► Trigger: %s on %s.%s", name, schema, table)
+            definition = source.get_trigger_definition(database, schema, name, table)
+            if definition:
+                out_file = triggers_dir / f"{schema}.{table}.{name}.sql"
+                out_file.write_text(definition, encoding="utf-8")
 
 
 def extract_stats(source: SourceConnector, config: dict,

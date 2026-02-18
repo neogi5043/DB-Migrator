@@ -1,6 +1,6 @@
 {
   "source_table": "public.content_details_base",
-  "target_table": "target_db.content_details_base",
+  "target_table": "Bi_doctor_db.content_details_base",
   "columns": [
     {
       "source": "item_luid",
@@ -84,7 +84,7 @@
       "target": "last_accessed_at",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -117,12 +117,12 @@
       "target": "total_size_mb",
       "source_type_raw": "numeric",
       "canonical_type": "DECIMAL",
-      "target_type": "DECIMAL",
+      "target_type": "DECIMAL(38,10)",
       "role": "null",
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Source numeric type has unspecified precision and scale; mapped to DECIMAL without precision and scale which may cause differences."
+        "Source numeric type has unspecified precision and scale; mapped to DECIMAL(38,10) to preserve precision."
       ]
     },
     {
@@ -130,7 +130,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,

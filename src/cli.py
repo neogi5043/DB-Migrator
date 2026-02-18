@@ -77,7 +77,57 @@ def cmd_propose(args, config):
                 print(f"    ✗ Failed: {e}")
 
     print(f"\nDraft mappings saved in mappings/draft/.")
-    print("Review each file, then move approved ones to mappings/approved/.")
+
+    # -------------------------------------------------------------------------
+    # PART 2: Translate Views & Routines
+    # -------------------------------------------------------------------------
+    print("\n=== Translating Views & Routines ===")
+    from src.llm_client import translate_sql
+
+    for category in ["views", "routines", "triggers"]:
+        src_dir = ROOT_DIR / "schemas" / category
+        if not src_dir.exists():
+            continue
+        
+        # Output to mappings/draft/{category}
+        draft_dir = ROOT_DIR / "mappings" / "draft" / category
+        draft_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Ensure approved dir exists for user convenience
+        approved_dir = ROOT_DIR / "mappings" / "approved" / category
+        approved_dir.mkdir(parents=True, exist_ok=True)
+
+        ObjectTypeMap = {
+            "views": "VIEW",
+            "routines": "PROCEDURE/FUNCTION",
+            "triggers": "TRIGGER"
+        }
+
+        for sql_file in src_dir.glob("*.sql"):
+            print(f"  ► Translating {category[:-1]} {sql_file.name}…")
+            try:
+                sql_code = sql_file.read_text(encoding="utf-8")
+                translated = translate_sql(
+                    llm, 
+                    config["source"]["engine"], 
+                    config["target"]["engine"], 
+                    sql_code, 
+                    ObjectTypeMap.get(category, "SQL"),
+                    # Strip schema prefix (e.g. "public.view_name" -> "view_name")
+                    object_name=sql_file.stem.split(".")[-1]
+                )
+                
+                tgt_file = draft_dir / sql_file.name
+                tgt_file.write_text(translated, encoding="utf-8")
+                print(f"    ✓ Written to {tgt_file}")
+            except Exception as e:
+                print(f"    ✗ Failed: {e}")
+
+    print("\nReview generated SQL in mappings/draft/.")
+    print("Move approved table mappings AND sql files to mappings/approved/.")
+
+    print("\nReview generated SQL in mappings/views/, mappings/routines/, and mappings/triggers/.")
+    print("Move approved table mappings to mappings/approved/.")
 
 
 def cmd_validate_mapping(args, config):
@@ -208,6 +258,19 @@ def cmd_list_engines(args, config):
     print(f"\nTotal: {len(SOURCE_REGISTRY)} sources, {len(TARGET_REGISTRY)} targets")
 
 
+def cmd_clean(args, config):
+    """Clean all generated artifacts (schemas, mappings, stats, reports)."""
+    import shutil
+    
+    dirs = ["schemas", "stats", "mappings", "reports", "checkpoints"]
+    for d in dirs:
+        path = ROOT_DIR / d
+        if path.exists():
+            print(f"Removing {path}...")
+            shutil.rmtree(path)
+    print("✓ Project state cleaned.")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Universal Database Migration Framework",
@@ -218,6 +281,7 @@ def main():
 
     sub.add_parser("extract", help="Extract schema + stats from source")
     sub.add_parser("propose", help="Generate LLM mapping proposals")
+    sub.add_parser("clean", help="Clean generated artifacts")
 
     p_vm = sub.add_parser("validate-mapping", help="Validate mapping files")
     p_vm.add_argument("path", nargs="?", default=None)
@@ -252,6 +316,7 @@ def main():
     cmds = {
         "extract": cmd_extract,
         "propose": cmd_propose,
+        "clean": cmd_clean,
         "validate-mapping": cmd_validate_mapping,
         "apply-schema": cmd_apply_schema,
         "migrate": cmd_migrate,

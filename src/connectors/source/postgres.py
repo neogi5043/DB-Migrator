@@ -239,3 +239,78 @@ class PostgresSourceConnector(SourceConnector):
     def close(self) -> None:
         if self.conn:
             self.conn.close()
+
+    def list_routines(self, database: str, schema: str) -> list[dict]:
+        sql = """
+            SELECT routine_schema, routine_name, routine_type
+            FROM information_schema.routines
+            WHERE routine_schema = %s
+              AND routine_type IN ('FUNCTION', 'PROCEDURE')
+            ORDER BY routine_name
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema])
+        return [{"schema": r[0], "name": r[1], "type": r[2]}
+                for r in cur.fetchall()]
+
+    def get_routine_definition(self, database: str, schema: str, name: str) -> str:
+        # pg_get_functiondef needs the OID. We query by name and schema.
+        # This might fail for overloaded functions; we take the first match for now.
+        sql = """
+            SELECT pg_get_functiondef(p.oid)
+            FROM pg_proc p
+            JOIN pg_namespace n ON p.pronamespace = n.oid
+            WHERE n.nspname = %s AND p.proname = %s
+            LIMIT 1
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema, name])
+        row = cur.fetchone()
+        return row[0] if row else ""
+
+    def list_views(self, database: str, schema: str) -> list[dict]:
+        sql = """
+            SELECT table_schema, table_name
+            FROM information_schema.views
+            WHERE table_schema = %s
+            ORDER BY table_name
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema])
+        return [{"schema": r[0], "name": r[1]} for r in cur.fetchall()]
+
+    def get_view_definition(self, database: str, schema: str, name: str) -> str:
+        sql = """
+            SELECT definition
+            FROM pg_views
+            WHERE schemaname = %s AND viewname = %s
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema, name])
+        row = cur.fetchone()
+        return row[0] if row else ""
+
+    def list_triggers(self, database: str, schema: str) -> list[dict]:
+        sql = """
+            SELECT trigger_schema, trigger_name, event_object_table
+            FROM information_schema.triggers
+            WHERE trigger_schema = %s
+            ORDER BY trigger_name
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema])
+        return [{"schema": r[0], "name": r[1],
+                 "table": r[2]} for r in cur.fetchall()]
+
+    def get_trigger_definition(self, database: str, schema: str, name: str, table: str) -> str:
+        sql = """
+            SELECT pg_get_triggerdef(t.oid)
+            FROM pg_trigger t
+            JOIN pg_class c ON t.tgrelid = c.oid
+            JOIN pg_namespace n ON c.relnamespace = n.oid
+            WHERE n.nspname = %s AND t.tgname = %s AND c.relname = %s
+        """
+        cur = self.conn.cursor()
+        cur.execute(sql, [schema, name, table])
+        row = cur.fetchone()
+        return row[0] if row else ""

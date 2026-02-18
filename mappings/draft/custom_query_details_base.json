@@ -1,6 +1,6 @@
 {
   "source_table": "public.custom_query_details_base",
-  "target_table": "target_db.custom_query_details_base",
+  "target_table": "bi_doctor_db.custom_query_details_base",
   "columns": [
     {
       "source": "project_id",
@@ -106,7 +106,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,

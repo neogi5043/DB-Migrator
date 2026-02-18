@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `Bi_doctor_db`.`content_details_base` (
     `last_accessed_at` DATETIME(6),
     `owner_email` VARCHAR(100),
     `item_hyperlink` LONGTEXT,
-    `total_size_mb` DECIMAL(12,6),
+    `total_size_mb` DECIMAL(38,10),
     `load_time` DATETIME(6),
     PRIMARY KEY (`item_luid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

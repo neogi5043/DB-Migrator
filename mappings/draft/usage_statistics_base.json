@@ -1,6 +1,6 @@
 {
   "source_table": "public.usage_statistics_base",
-  "target_table": "target_db.usage_statistics_base",
+  "target_table": "bi_doctor_db.usage_statistics_base",
   "columns": [
     {
       "source": "project_id",
@@ -73,7 +73,7 @@
       "target": "created_at",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -84,7 +84,7 @@
       "target": "updated_at",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,
@@ -117,7 +117,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": true,
       "transform": null,

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS `Bi_doctor_db`.`datasource_details_base` (
-    `row_id` BIGINT AUTO_INCREMENT NOT NULL,
+    `row_id` BIGINT NOT NULL,
     `wb_project_id` BIGINT,
     `wb_project` VARCHAR(100),
     `workbook_id` VARCHAR(36),

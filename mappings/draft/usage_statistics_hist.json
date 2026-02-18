@@ -1,6 +1,6 @@
 {
   "source_table": "public.usage_statistics_hist",
-  "target_table": "target_db.usage_statistics_hist",
+  "target_table": "bi_doctor_db.usage_statistics_hist",
   "columns": [
     {
       "source": "project_id",
@@ -77,7 +77,9 @@
       "role": "null",
       "nullable": true,
       "transform": null,
-      "warnings": []
+      "warnings": [
+        "Mapping text to LONGTEXT for a column named like a timestamp; consider verifying data type correctness"
+      ]
     },
     {
       "source": "updated_at",
@@ -88,7 +90,9 @@
       "role": "null",
       "nullable": true,
       "transform": null,
-      "warnings": []
+      "warnings": [
+        "Mapping text to LONGTEXT for a column named like a timestamp; consider verifying data type correctness"
+      ]
     },
     {
       "source": "total_views",
@@ -99,7 +103,9 @@
       "role": "null",
       "nullable": true,
       "transform": null,
-      "warnings": []
+      "warnings": [
+        "Mapping text to LONGTEXT for a column named like a numeric count; consider verifying data type correctness"
+      ]
     },
     {
       "source": "file_name",
@@ -117,7 +123,7 @@
       "target": "load_time",
       "source_type_raw": "timestamp without time zone",
       "canonical_type": "DATETIME",
-      "target_type": "DATETIME",
+      "target_type": "DATETIME(6)",
       "role": "null",
       "nullable": false,
       "transform": null,
@@ -128,24 +134,21 @@
   "foreign_keys": [],
   "indexes": [
     {
-      "column": "project_id",
-      "name": "idx_usage_statistics_hist_latest"
+      "name": "idx_usage_statistics_hist_latest",
+      "unique": false,
+      "columns": [
+        "project_id",
+        "workbook_id",
+        "view_id",
+        "load_time"
+      ]
     },
     {
-      "column": "workbook_id",
-      "name": "idx_usage_statistics_hist_latest"
-    },
-    {
-      "column": "view_id",
-      "name": "idx_usage_statistics_hist_latest"
-    },
-    {
-      "column": "load_time",
-      "name": "idx_usage_statistics_hist_latest"
-    },
-    {
-      "column": "load_time",
-      "name": "idx_usagestats_hist_load_time"
+      "name": "idx_usagestats_hist_load_time",
+      "unique": false,
+      "columns": [
+        "load_time"
+      ]
     }
   ],
   "warnings": [],

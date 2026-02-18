@@ -1,6 +1,6 @@
 {
   "source_table": "public.dashboard_details_hist",
-  "target_table": "dashboard_details_hist",
+  "target_table": "bi_doctor_db.dashboard_details_hist",
   "columns": [
     {
       "source": "project_id",
@@ -227,44 +227,24 @@
   "foreign_keys": [],
   "indexes": [
     {
-      "column": "project_id",
       "name": "idx_dashboard_details_hist_latest",
-      "unique": false
+      "unique": false,
+      "columns": [
+        "project_id",
+        "workbook_id",
+        "dashboard_id",
+        "sheet_id",
+        "field_id",
+        "datasource_id",
+        "load_time"
+      ]
     },
     {
-      "column": "workbook_id",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "dashboard_id",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "sheet_id",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "field_id",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "datasource_id",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "load_time",
-      "name": "idx_dashboard_details_hist_latest",
-      "unique": false
-    },
-    {
-      "column": "load_time",
       "name": "idx_dashboard_hist_load_time",
-      "unique": false
+      "unique": false,
+      "columns": [
+        "load_time"
+      ]
     }
   ],
   "warnings": [],

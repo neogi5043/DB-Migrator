@@ -74,7 +74,9 @@ class MySQLTargetConnector(TargetConnector):
                 grouped[name]["columns"].extend(idx["columns"])
             elif "column" in idx:
                 col = idx["column"]
-                if col not in grouped[name]["columns"]:
+                if isinstance(col, list):
+                    grouped[name]["columns"].extend(col)
+                elif col not in grouped[name]["columns"]:
                     grouped[name]["columns"].append(col)
 
         stmts = []
@@ -99,15 +101,31 @@ class MySQLTargetConnector(TargetConnector):
 
     def apply_ddl(self, sql: str) -> None:
         import mysql.connector.errors as me
+        import re
+
+        # Strip DELIMITER commands as they are client-side only
+        # CASE 1: "DELIMITER //" ... "DELIMITER ;"
+        # We just remove lines starting with DELIMITER (case-insensitive)
+        sql_clean = re.sub(r"(?i)^\s*DELIMITER.*$", "", sql, flags=re.MULTILINE)
+        
         cur = self.conn.cursor()
         try:
-            cur.execute(sql)
+            # enable multi=True to allow scripts (DROP...; CREATE...)
+            # Iterate through the generator to ensure execution
+            try:
+                for _ in cur.execute(sql_clean, multi=True):
+                    pass
+            except TypeError:
+                # Fallback for drivers/cursors that don't support multi=True (e.g. CMySQLCursor)
+                cur.execute(sql_clean)
+
             self.conn.commit()
             log.info("DDL applied: %.80s…", sql.replace("\n", " "))
         except me.DatabaseError as e:
             # 1061 = Duplicate key name, 1050 = Table already exists,
             # 1071 = Key too long, 1170 = BLOB/TEXT in key without length
-            if e.errno in (1061, 1050, 1071, 1170):
+            # 1359 = Trigger already exists (depending on version logic)
+            if e.errno in (1061, 1050, 1071, 1170, 1359):
                 log.warning("Skipped (already exists): %.80s…", sql.replace("\n", " "))
                 self.conn.rollback()
             else:
@@ -120,7 +138,7 @@ class MySQLTargetConnector(TargetConnector):
         cur = self.conn.cursor()
         cols = ", ".join(f"`{c}`" for c in columns)
         placeholders = ", ".join(["%s"] * len(columns))
-        sql = f"INSERT INTO {target_table} ({cols}) VALUES ({placeholders})"
+        sql = f"INSERT IGNORE INTO {target_table} ({cols}) VALUES ({placeholders})"
         batch = [tuple(row.get(c) for c in columns) for row in rows]
         cur.executemany(sql, batch)
         self.conn.commit()

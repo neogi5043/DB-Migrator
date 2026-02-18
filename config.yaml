@@ -41,7 +41,7 @@ llm:
   prompt_version: v1
 
 migration:
-  chunk_size: 100000
+  chunk_size: 5000
   max_chunk_failures: 5
   disable_fk_during_load: true
 

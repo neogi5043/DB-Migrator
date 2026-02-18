@@ -195,6 +195,30 @@ class SourceConnector(ABC):
     def get_row_count(self, database: str, schema: str, table: str) -> int:
         """Return total row count for a source table."""
 
+    @abstractmethod
+    def list_routines(self, database: str, schema: str) -> list[dict]:
+        """Return list of {schema, name, type (FUNCTION/PROCEDURE)}."""
+
+    @abstractmethod
+    def get_routine_definition(self, database: str, schema: str, name: str) -> str:
+        """Return the CREATE OR REPLACE code for a routine."""
+
+    @abstractmethod
+    def list_views(self, database: str, schema: str) -> list[dict]:
+        """Return list of {schema, name} for views."""
+
+    @abstractmethod
+    def get_view_definition(self, database: str, schema: str, name: str) -> str:
+        """Return the CREATE VIEW code."""
+
+    @abstractmethod
+    def list_triggers(self, database: str, schema: str) -> list[dict]:
+        """Return list of {schema, name, table} for triggers."""
+
+    @abstractmethod
+    def get_trigger_definition(self, database: str, schema: str, name: str, table: str) -> str:
+        """Return the CREATE TRIGGER code."""
+
     def close(self) -> None:
         """Close the connection (optional override)."""
         pass

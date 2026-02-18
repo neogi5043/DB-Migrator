@@ -1,6 +1,6 @@
 {
   "source_table": "public.usage_statistics_base",
-  "target_table": "usage_statistics_base",
+  "target_table": "bi_doctor_db.usage_statistics_base",
   "columns": [
     {
       "source": "project_id",
