@@ -9,76 +9,35 @@ Uses **Azure OpenAI (GPT-4.1)** to intelligently translate column types and gene
 ## How It Works
 
 ```mermaid
-graph TB
-    %% Nodes
+graph TD
     User((User))
-    Config[config.yaml / .env]
-
-    subgraph Source_System [Source System]
-        SourceDB[(PostgreSQL / MSSQL)]
-        Extractor[Extractor]
-    end
-
-    subgraph LLM_Service [AI Service]
-        AzureOpenAI[Azure OpenAI GPT-4]
-    end
-
-    subgraph Core_Pipeline [Migration Pipeline]
-        Proposer[Proposer]
-        SchemaGen[Schema Generator]
-        Migrator[Migrator]
-        Validator[Validator]
-    end
-
-    subgraph Target_System [Target System]
-        TargetDB[(MySQL)]
-    end
-
-    subgraph File_System [Artifacts]
-        SchemaJSON[schemas/*.json]
-        DraftMap[mappings/draft/*.json]
-        ApprovedMap[mappings/approved/*.json]
-        DDLFiles[ddl/*.sql]
-        Checkpoints[checkpoints/]
-        Reports[reports/*.json]
+    Source[(Source DB)]
+    Target[(Target MySQL)]
+    AI[Azure OpenAI]
+    
+    subgraph Pipeline
+        Extract[1. Extract Schema]
+        Propose[2. Propose Mappings]
+        Review[3. Review & Approve]
+        Apply[4. Apply DDL]
+        Migrate[5. Migrate Data]
+        Validate[6. Validate]
     end
 
     %% Flow
-    User --> Config
-    Config --> Extractor
-    Config --> Proposer
-    Config --> SchemaGen
-    Config --> Migrator
-    Config --> Validator
-
-    %% 1. Extract
-    SourceDB --> Extractor
-    Extractor --> SchemaJSON
+    Source --> Extract
+    Extract --> Propose
+    AI <--> Propose
+    Propose -- "Draft JSON" --> Review
+    Review -- "Approved JSON" --> Apply
+    Apply --> Target
+    Review -- "Approved JSON" --> Migrate
+    Source --> Migrate
+    Migrate -- "Chunked Data" --> Target
+    Source <--> Validate
+    Target <--> Validate
     
-    %% 2. Propose
-    SchemaJSON --> Proposer
-    Proposer <--> AzureOpenAI
-    Proposer --> DraftMap
-
-    %% 3. Review
-    DraftMap -- "Manual Review" --> User
-    User -- "Approve" --> ApprovedMap
-
-    %% 4. Apply
-    ApprovedMap --> SchemaGen
-    SchemaGen --> DDLFiles
-    DDLFiles -- "Apply DDL" --> TargetDB
-
-    %% 5. Migrate
-    ApprovedMap --> Migrator
-    SourceDB --> Migrator
-    Migrator -- "Chunked Data (OFFSET/LIMIT)" --> TargetDB
-    Migrator -- "Track Progress" --> Checkpoints
-
-    %% 6. Validate
-    SourceDB <--> Validator
-    TargetDB <--> Validator
-    Validator --> Reports
+    User -- "Review / Run CLI" --> Pipeline
 ```
 
 ---
