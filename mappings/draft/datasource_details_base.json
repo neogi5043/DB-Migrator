@@ -442,11 +442,10 @@
   ],
   "warnings": [
     "Column 'row_id' is SERIAL/IDENTITY in Postgres; map to BIGINT with auto-increment in MySQL.",
-    "Postgres TEXT mapped to MySQL LONGTEXT for columns: wb_tags, description, ds_tags, formula, custom_query, flag, file_name.",
-    "Postgres timestamp without time zone mapped to MySQL DATETIME(6) for datetime precision preservation."
+    "Postgres TEXT mapped to MySQL LONGTEXT for CLOB canonical type.",
+    "Postgres timestamp without time zone mapped to MySQL DATETIME(6) for higher precision."
   ],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }

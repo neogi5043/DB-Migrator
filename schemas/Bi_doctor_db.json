@@ -1,7 +1,7 @@
 {
   "source_engine": "postgres",
   "database": "Bi_doctor_db",
-  "extracted_at": "2026-02-18T18:29:22.530279+00:00",
+  "extracted_at": "2026-02-18T22:23:11.850743+00:00",
   "tables": [
     {
       "schema": "public",

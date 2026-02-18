@@ -1,6 +1,6 @@
 {
   "source_table": "public.dashboard_details_base",
-  "target_table": "Bi_doctor_db.dashboard_details_base",
+  "target_table": "bi_doctor_db.dashboard_details_base",
   "columns": [
     {
       "source": "row_id",
@@ -11,7 +11,9 @@
       "role": "primary_key",
       "nullable": false,
       "transform": null,
-      "warnings": []
+      "warnings": [
+        "Mapped SERIAL/IDENTITY column to BIGINT AUTO_INCREMENT"
+      ]
     },
     {
       "source": "project_id",
@@ -284,6 +286,5 @@
   "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }

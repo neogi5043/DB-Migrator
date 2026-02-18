@@ -426,6 +426,5 @@
   "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }

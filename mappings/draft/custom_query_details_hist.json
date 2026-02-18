@@ -117,16 +117,13 @@
   "foreign_keys": [],
   "indexes": [
     {
+      "column": "load_time",
       "name": "idx_customqry_hist_load_time",
-      "unique": false,
-      "columns": [
-        "load_time"
-      ]
+      "unique": false
     }
   ],
   "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }

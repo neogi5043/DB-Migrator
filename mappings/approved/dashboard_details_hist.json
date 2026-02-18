@@ -1,6 +1,6 @@
 {
   "source_table": "public.dashboard_details_hist",
-  "target_table": "bi_doctor_db.dashboard_details_hist",
+  "target_table": "Bi_doctor_db.dashboard_details_hist",
   "columns": [
     {
       "source": "project_id",
@@ -250,6 +250,5 @@
   "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }

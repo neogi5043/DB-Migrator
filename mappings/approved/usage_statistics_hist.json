@@ -78,7 +78,7 @@
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Source type 'text' for column 'created_at' mapped to LONGTEXT; consider verifying if this should be a datetime type."
+        "Mapping text to LONGTEXT for created_at may lose datetime semantics"
       ]
     },
     {
@@ -91,7 +91,7 @@
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Source type 'text' for column 'updated_at' mapped to LONGTEXT; consider verifying if this should be a datetime type."
+        "Mapping text to LONGTEXT for updated_at may lose datetime semantics"
       ]
     },
     {
@@ -103,9 +103,7 @@
       "role": "null",
       "nullable": true,
       "transform": null,
-      "warnings": [
-        "Source type 'text' for column 'total_views' mapped to LONGTEXT; consider verifying if this should be a numeric type."
-      ]
+      "warnings": []
     },
     {
       "source": "file_name",
@@ -134,26 +132,33 @@
   "foreign_keys": [],
   "indexes": [
     {
+      "column": "project_id",
       "name": "idx_usage_statistics_hist_latest",
-      "unique": false,
-      "columns": [
-        "project_id",
-        "workbook_id",
-        "view_id",
-        "load_time"
-      ]
+      "unique": false
     },
     {
+      "column": "workbook_id",
+      "name": "idx_usage_statistics_hist_latest",
+      "unique": false
+    },
+    {
+      "column": "view_id",
+      "name": "idx_usage_statistics_hist_latest",
+      "unique": false
+    },
+    {
+      "column": "load_time",
+      "name": "idx_usage_statistics_hist_latest",
+      "unique": false
+    },
+    {
+      "column": "load_time",
       "name": "idx_usagestats_hist_load_time",
-      "unique": false,
-      "columns": [
-        "load_time"
-      ]
+      "unique": false
     }
   ],
   "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
-  "status": "draft",
-  "prompt_version": "v1"
+  "status": "draft"
 }
