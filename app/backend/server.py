@@ -368,9 +368,40 @@ async def run_validate():
             yield _sse({"type": "error", "msg": traceback.format_exc()})
 
     return StreamingResponse(stream(), media_type="text/event-stream")
+    # these are for production
+
+
+# ── Serve Frontend (production) ────────────────────────────────────────
+# In production, FastAPI serves the Vite-built static files.
+# In development, Vite's dev server proxies /api to this backend.
+
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    from fastapi.staticfiles import StaticFiles
+    from starlette.responses import FileResponse
+
+    @app.get("/")
+    async def serve_index():
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+
+    # Mount static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+
+    # Catch-all for SPA routing — must be LAST
+    @app.get("/{path:path}")
+    async def spa_fallback(path: str):
+        file = FRONTEND_DIST / path
+        if file.exists() and file.is_file():
+            return FileResponse(str(file))
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+        # these are for production
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    # uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")

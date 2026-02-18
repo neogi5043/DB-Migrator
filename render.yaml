@@ -1,0 +1,30 @@
+## Render Blueprint – DB Migrator
+## Push this repo to GitHub, then connect it on Render.
+## See: https://render.com/docs/blueprint-spec
+
+services:
+  # ── Backend (FastAPI) ──────────────────────────────────────────────
+  - type: web
+    name: db-migrator-api
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: .
+    buildCommand: |
+      pip install -r requirements.txt &&
+      pip install -r app/backend/requirements.txt &&
+      cd app/frontend && npm install && npm run build
+    startCommand: >
+      uvicorn app.backend.server:app
+      --host 0.0.0.0
+      --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.6"
+      - key: NODE_VERSION
+        value: "20"
+      # --- Add your secrets here (or set via Render dashboard) ---
+      - key: AZURE_OPENAI_API_KEY
+        sync: false
+      - key: AZURE_OPENAI_ENDPOINT
+        sync: false
