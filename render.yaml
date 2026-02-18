@@ -13,7 +13,7 @@ services:
     buildCommand: |
       pip install -r requirements.txt &&
       pip install -r app/backend/requirements.txt &&
-      cd app/frontend && npm install && npx vite build
+      cd app/frontend && npm install && npm run build
     startCommand: >
       uvicorn app.backend.server:app
       --host 0.0.0.0
