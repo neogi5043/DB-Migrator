@@ -7,6 +7,16 @@ from src.connectors.base import TargetConnector
 log = logging.getLogger(__name__)
 
 
+def _quote_table(fqn: str) -> str:
+    """Backtick-quote a schema.table reference for MySQL.
+
+    e.g. 'Bi_doctor_db.orders' -> '`Bi_doctor_db`.`orders`'
+         'orders'              -> '`orders`'
+    """
+    parts = fqn.split(".")
+    return ".".join(f"`{p}`" for p in parts)
+
+
 class MySQLTargetConnector(TargetConnector):
     engine_name = "mysql"
 
@@ -138,7 +148,7 @@ class MySQLTargetConnector(TargetConnector):
         cur = self.conn.cursor()
         cols = ", ".join(f"`{c}`" for c in columns)
         placeholders = ", ".join(["%s"] * len(columns))
-        sql = f"INSERT IGNORE INTO {target_table} ({cols}) VALUES ({placeholders})"
+        sql = f"INSERT IGNORE INTO {_quote_table(target_table)} ({cols}) VALUES ({placeholders})"
         batch = [tuple(row.get(c) for c in columns) for row in rows]
         cur.executemany(sql, batch)
         self.conn.commit()
@@ -146,14 +156,15 @@ class MySQLTargetConnector(TargetConnector):
 
     def get_row_count(self, table: str) -> int:
         cur = self.conn.cursor()
-        cur.execute(f"SELECT COUNT(*) FROM {table}")
+        cur.execute(f"SELECT COUNT(*) FROM {_quote_table(table)}")
         return cur.fetchone()[0]
 
     def run_aggregate(self, table: str, column: str, func: str) -> Any:
+        qt = _quote_table(table)
         if func.upper() == "COUNT_DISTINCT":
-            sql = f"SELECT COUNT(DISTINCT `{column}`) FROM {table}"
+            sql = f"SELECT COUNT(DISTINCT `{column}`) FROM {qt}"
         else:
-            sql = f"SELECT COALESCE({func}(`{column}`), 0) FROM {table}"
+            sql = f"SELECT COALESCE({func}(`{column}`), 0) FROM {qt}"
         cur = self.conn.cursor()
         cur.execute(sql)
         return cur.fetchone()[0]

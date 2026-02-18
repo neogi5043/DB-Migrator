@@ -72,7 +72,9 @@ def validate_table(
     schema = src_parts[0] if len(src_parts) > 1 else ""
     src_table = src_parts[-1]
     target_schema = config["target"].get("schema", "public")
-    tgt_table = mapping.get("target_table", src_table)
+    # Strip any existing schema prefix (e.g. "Bi_doctor_db.orders" -> "orders")
+    raw_tgt = mapping.get("target_table", src_table)
+    tgt_table = raw_tgt.rsplit(".", 1)[-1] if "." in raw_tgt else raw_tgt
     fqn_tgt = f"{target_schema}.{tgt_table}"
 
     checks = []

@@ -94,15 +94,11 @@ def migrate_table(
     src_table_fqn = mapping.get("source_table", "")
     schema = src_table_fqn.split(".")[0] if "." in src_table_fqn else ""
     table = src_table_fqn.split(".")[-1]
-    target_table = mapping.get("target_table", table)
+    # Strip any existing schema prefix (e.g. "Bi_doctor_db.orders" -> "orders")
+    raw_target = mapping.get("target_table", table)
+    target_table = raw_target.rsplit(".", 1)[-1] if "." in raw_target else raw_target
     target_schema = config["target"].get("schema", "public")
-    
-    # Strip existing schema if present and enforce target_schema
-    if "." in target_table:
-        _, tbl_name = target_table.split(".", 1)
-        fqn_target = f"{target_schema}.{tbl_name}"
-    else:
-        fqn_target = f"{target_schema}.{target_table}"
+    fqn_target = f"{target_schema}.{target_table}"
 
     columns = mapping.get("columns", [])
 

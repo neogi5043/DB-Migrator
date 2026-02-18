@@ -1,6 +1,6 @@
 {
   "source_table": "public.event_details_base",
-  "target_table": "bi_doctor_db.event_details_base",
+  "target_table": "Bi_doctor_db.event_details_base",
   "columns": [
     {
       "source": "event_id",

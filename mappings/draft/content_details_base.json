@@ -121,9 +121,7 @@
       "role": "null",
       "nullable": true,
       "transform": null,
-      "warnings": [
-        "Source numeric type has unspecified precision and scale; mapped to DECIMAL(38,10) to preserve precision."
-      ]
+      "warnings": []
     },
     {
       "source": "load_time",

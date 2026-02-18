@@ -78,7 +78,7 @@
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Mapping text to LONGTEXT for a column named like a timestamp; consider verifying data type correctness"
+        "Source type 'text' for column 'created_at' mapped to LONGTEXT; consider verifying if this should be a datetime type."
       ]
     },
     {
@@ -91,7 +91,7 @@
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Mapping text to LONGTEXT for a column named like a timestamp; consider verifying data type correctness"
+        "Source type 'text' for column 'updated_at' mapped to LONGTEXT; consider verifying if this should be a datetime type."
       ]
     },
     {
@@ -104,7 +104,7 @@
       "nullable": true,
       "transform": null,
       "warnings": [
-        "Mapping text to LONGTEXT for a column named like a numeric count; consider verifying data type correctness"
+        "Source type 'text' for column 'total_views' mapped to LONGTEXT; consider verifying if this should be a numeric type."
       ]
     },
     {

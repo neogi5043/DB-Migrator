@@ -117,9 +117,11 @@
   "foreign_keys": [],
   "indexes": [
     {
-      "column": "load_time",
       "name": "idx_customqry_hist_load_time",
-      "unique": false
+      "unique": false,
+      "columns": [
+        "load_time"
+      ]
     }
   ],
   "warnings": [],

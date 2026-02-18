@@ -281,9 +281,7 @@
       ]
     }
   ],
-  "warnings": [
-    "Column 'row_id' is SERIAL/IDENTITY in Postgres; map to BIGINT with auto-increment in MySQL."
-  ],
+  "warnings": [],
   "source_engine": "postgres",
   "target_engine": "mysql",
   "status": "draft",

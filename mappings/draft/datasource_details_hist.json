@@ -1,6 +1,6 @@
 {
   "source_table": "public.datasource_details_hist",
-  "target_table": "Bi_doctor_db.datasource_details_hist",
+  "target_table": "bi_doctor_db.datasource_details_hist",
   "columns": [
     {
       "source": "wb_project_id",
