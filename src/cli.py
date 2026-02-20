@@ -30,11 +30,14 @@ def cmd_extract(args, config):
     """Extract schema + stats from source database."""
     from src.extractor import extract_schema, extract_stats
 
+    run_id = getattr(args, "run_id", None) or generate_run_id()
+    print(f"Run ID: {run_id}")
+
     source = get_source(config["source"]["engine"])
     source.connect(config["source"])
     try:
-        spec_path = extract_schema(source, config)
-        extract_stats(source, config, spec_path)
+        spec_path = extract_schema(source, config, run_id=run_id)
+        extract_stats(source, config, spec_path, run_id=run_id)
         print(f"✓ Schema extracted to {spec_path}")
     finally:
         source.close()
@@ -44,8 +47,12 @@ def cmd_propose(args, config):
     """Generate LLM-powered mapping proposals for each table."""
     from src.llm_client import build_llm, generate_mapping
 
+    run_id = getattr(args, "run_id", None)
+
     ensure_dirs()
     spec_dir = ROOT_DIR / "schemas"
+    if run_id:
+        spec_dir = spec_dir / run_id
     spec_files = list(spec_dir.glob("*.json"))
     if not spec_files:
         print("✗ No schema specs found. Run 'extract' first.")
@@ -54,6 +61,17 @@ def cmd_propose(args, config):
     llm = build_llm(config)
     target_engine = config["target"]["engine"]
     target_schema = config["target"].get("schema", "public")
+
+    # Decide run-scoped mapping roots
+    if run_id:
+        draft_root = ROOT_DIR / "mappings" / run_id / "draft"
+        approved_root = ROOT_DIR / "mappings" / run_id / "approved"
+    else:
+        draft_root = ROOT_DIR / "mappings" / "draft"
+        approved_root = ROOT_DIR / "mappings" / "approved"
+
+    draft_root.mkdir(parents=True, exist_ok=True)
+    approved_root.mkdir(parents=True, exist_ok=True)
 
     for spec_path in spec_files:
         spec = json.loads(spec_path.read_text(encoding="utf-8"))
@@ -70,13 +88,13 @@ def cmd_propose(args, config):
                 mapping["status"] = "draft"
                 mapping["prompt_version"] = config["llm"].get("prompt_version", "v1")
 
-                out = ROOT_DIR / "mappings" / "draft" / f"{table['name']}.json"
+                out = draft_root / f"{table['name']}.json"
                 out.write_text(json.dumps(mapping, indent=2, default=str), encoding="utf-8")
                 print(f"    ✓ Written to {out}")
             except Exception as e:
                 print(f"    ✗ Failed: {e}")
 
-    print(f"\nDraft mappings saved in mappings/draft/.")
+    print(f"\nDraft mappings saved in {draft_root}/.")
 
     # -------------------------------------------------------------------------
     # PART 2: Translate Views & Routines
@@ -85,16 +103,17 @@ def cmd_propose(args, config):
     from src.llm_client import translate_sql
 
     for category in ["views", "routines", "triggers"]:
-        src_dir = ROOT_DIR / "schemas" / category
+        # Source SQL lives under the same schemas root (optionally run-scoped)
+        src_dir = spec_dir / category
         if not src_dir.exists():
             continue
         
-        # Output to mappings/draft/{category}
-        draft_dir = ROOT_DIR / "mappings" / "draft" / category
+        # Output to mappings/.../draft/{category}
+        draft_dir = draft_root / category
         draft_dir.mkdir(parents=True, exist_ok=True)
         
         # Ensure approved dir exists for user convenience
-        approved_dir = ROOT_DIR / "mappings" / "approved" / category
+        approved_dir = approved_root / category
         approved_dir.mkdir(parents=True, exist_ok=True)
 
         ObjectTypeMap = {
@@ -123,16 +142,20 @@ def cmd_propose(args, config):
             except Exception as e:
                 print(f"    ✗ Failed: {e}")
 
-    print("\nReview generated SQL in mappings/draft/.")
-    print("Move approved table mappings AND sql files to mappings/approved/.")
-
-    print("\nReview generated SQL in mappings/views/, mappings/routines/, and mappings/triggers/.")
-    print("Move approved table mappings to mappings/approved/.")
+    print(f"\nReview generated SQL in {draft_root}/.")
+    print(f"Move approved table mappings AND sql files to {approved_root}/.")
 
 
 def cmd_validate_mapping(args, config):
     """Validate mapping JSON structure."""
-    path = Path(args.path) if args.path else ROOT_DIR / "mappings" / "approved"
+    run_id = getattr(args, "run_id", None)
+    if args.path:
+        path = Path(args.path)
+    else:
+        if run_id:
+            path = ROOT_DIR / "mappings" / run_id / "approved"
+        else:
+            path = ROOT_DIR / "mappings" / "approved"
     files = list(path.glob("*.json")) if path.is_dir() else [path]
 
     if not files:
@@ -165,21 +188,23 @@ def cmd_apply_schema(args, config):
     """Generate and optionally apply DDL to target."""
     from src.schema_gen import generate_ddl, apply_schema
 
+    run_id = getattr(args, "run_id", None)
+
     target = get_target(config["target"]["engine"])
     if not args.dry_run:
         target.connect(config["target"])
 
     try:
-        ddl_paths = generate_ddl(target, config)
+        ddl_paths = generate_ddl(target, config, run_id=run_id)
         if not ddl_paths:
             print("✗ No approved mappings to generate DDL from.")
             return
 
         if args.dry_run:
             print("=== DRY RUN — DDL preview ===")
-            apply_schema(target, config, dry_run=True)
+            apply_schema(target, config, dry_run=True, run_id=run_id)
         else:
-            apply_schema(target, config, dry_run=False)
+            apply_schema(target, config, dry_run=False, run_id=run_id)
             print(f"✓ Schema applied ({len(ddl_paths)} tables)")
     finally:
         if not args.dry_run:
@@ -214,13 +239,15 @@ def cmd_validate(args, config):
     """Run post-migration validation."""
     from src.validator import validate_all
 
+    run_id = getattr(args, "run_id", None)
+
     source = get_source(config["source"]["engine"])
     target = get_target(config["target"]["engine"])
     source.connect(config["source"])
     target.connect(config["target"])
 
     try:
-        report_path = validate_all(source, target, config)
+        report_path = validate_all(source, target, config, run_id=run_id)
         report = json.loads(report_path.read_text())
         status = "✓ ALL PASS" if report["all_pass"] else "✗ FAILURES"
         print(f"\nValidation: {status}")
@@ -279,22 +306,55 @@ def main():
     parser.add_argument("--config", default=None, help="Path to config.yaml")
     sub = parser.add_subparsers(dest="command")
 
-    sub.add_parser("extract", help="Extract schema + stats from source")
-    sub.add_parser("propose", help="Generate LLM mapping proposals")
+    p_ex = sub.add_parser("extract", help="Extract schema + stats from source")
+    p_ex.add_argument(
+        "--run-id",
+        default=None,
+        help="Run identifier for per-run folders (schemas/, stats/, etc.)",
+    )
+
+    p_pr = sub.add_parser("propose", help="Generate LLM mapping proposals")
+    p_pr.add_argument(
+        "--run-id",
+        default=None,
+        help="Run identifier used when extracting schema (for per-run folders)",
+    )
     sub.add_parser("clean", help="Clean generated artifacts")
 
     p_vm = sub.add_parser("validate-mapping", help="Validate mapping files")
     p_vm.add_argument("path", nargs="?", default=None)
+    p_vm.add_argument(
+        "--run-id",
+        default=None,
+        help="Run identifier to select mappings/<run-id>/approved",
+    )
 
     p_as = sub.add_parser("apply-schema", help="Generate and apply DDL")
     p_as.add_argument("--dry-run", action="store_true", default=True)
     p_as.add_argument("--apply", action="store_true")
+    p_as.add_argument(
+        "--run-id",
+        default=None,
+        help="Run identifier for per-run mappings/ and ddl/ folders",
+    )
 
     p_mg = sub.add_parser("migrate", help="Run data migration")
     p_mg.add_argument("--tables", default=None, help="Comma-separated table filter")
-    p_mg.add_argument("--run-id", default=None, help="Resume with existing run ID")
+    p_mg.add_argument(
+        "--run-id",
+        default=None,
+        help=(
+            "Run identifier for checkpoints and per-run mappings/. "
+            "If omitted, a new run-id is generated."
+        ),
+    )
 
-    sub.add_parser("validate", help="Post-migration validation")
+    p_val = sub.add_parser("validate", help="Post-migration validation")
+    p_val.add_argument(
+        "--run-id",
+        default=None,
+        help="Run identifier to select per-run mappings/ and reports/",
+    )
 
     p_cp = sub.add_parser("show-checkpoints", help="Show checkpoint status")
     p_cp.add_argument("--run-id", required=True)

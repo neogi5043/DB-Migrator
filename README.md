@@ -99,7 +99,7 @@ TGT_MYSQL_PASS=your-password
 
 ```bash
 # Step 1: Extract schema from your source database
-python src/cli.py extract --database source_db
+python src/cli.py extract
 
 # Step 2: AI proposes column mappings
 python src/cli.py propose
@@ -121,6 +121,19 @@ python src/cli.py migrate
 python src/cli.py validate
 ```
 
+You can also keep each run **fully isolated** by supplying a run ID and reusing it across commands:
+
+```bash
+RUN_ID=myrun123
+
+python src/cli.py extract --run-id "$RUN_ID"
+python src/cli.py propose --run-id "$RUN_ID"
+# ...move reviewed files from mappings/$RUN_ID/draft/ → mappings/$RUN_ID/approved/...
+python src/cli.py apply-schema --run-id "$RUN_ID" --apply
+python src/cli.py migrate --run-id "$RUN_ID"
+python src/cli.py validate --run-id "$RUN_ID"
+```
+
 ---
 
 ## Switching Source Database
@@ -140,17 +153,32 @@ Then update the matching credentials in `.env`. Everything else stays the same.
 
 | Command | What It Does |
 |---------|-------------|
-| `python src/cli.py extract` | Reads source schema → saves to `schemas/` |
-| `python src/cli.py propose` | AI generates column mappings → saves to `mappings/draft/` |
-| `python src/cli.py validate-mapping [path]` | Checks a mapping file for errors |
-| `python src/cli.py apply-schema --dry-run` | Shows the DDL that *would* run (safe preview) |
-| `python src/cli.py apply-schema --apply` | Runs the DDL on MySQL |
-| `python src/cli.py migrate` | Moves all data in chunks (restartable) |
+| `python src/cli.py extract [--run-id <id>]` | Reads source schema → saves to `schemas/` or `schemas/<id>/` when `--run-id` is used |
+| `python src/cli.py propose [--run-id <id>]` | AI generates column mappings → saves to `mappings/draft/` or `mappings/<id>/draft/` |
+| `python src/cli.py validate-mapping [path] [--run-id <id>]` | Checks a mapping file or all files in `mappings[/<id>]/approved/` for errors |
+| `python src/cli.py apply-schema --dry-run [--run-id <id>]` | Shows the DDL that *would* run (safe preview) from `mappings[/<id>]/approved/` |
+| `python src/cli.py apply-schema --apply [--run-id <id>]` | Runs the DDL on MySQL (optionally scoped to `ddl/<id>/`) |
+| `python src/cli.py migrate [--run-id <id>]` | Moves all data in chunks (restartable) using `mappings[/<id>]/approved/` and `checkpoints/<id>/` |
 | `python src/cli.py migrate --tables orders` | Migrate a single table |
 | `python src/cli.py migrate --run-id <id>` | Resume a failed migration |
-| `python src/cli.py validate` | Compares source vs target row counts and values |
+| `python src/cli.py validate [--run-id <id>]` | Compares source vs target row counts and values, writing reports (optionally `reports/<id>/`) |
 | `python src/cli.py show-checkpoints --run-id <id>` | Shows progress of a migration run |
 | `python src/cli.py list-engines` | Lists all supported databases |
+
+---
+
+## Run IDs & Per‑Run Folders
+
+- **Without `--run-id`**: all commands use shared top-level folders (e.g. `schemas/`, `mappings/draft/`, `ddl/`, `reports/`) — this matches the original behavior.
+- **With `--run-id <id>`**: outputs for that run are isolated under per-run subfolders:
+  - `schemas/<id>/...`
+  - `stats/<id>/...`
+  - `mappings/<id>/draft/` and `mappings/<id>/approved/`
+  - `ddl/<id>/...`
+  - `reports/<id>/...`
+  - `checkpoints/<id>/...` (already per-run)
+
+This keeps artifacts from different runs from overwriting each other and makes it easy to compare, archive, or clean up specific runs.
 
 ---
 
@@ -176,13 +204,13 @@ DB Migrator/
 ├── templates/            # DDL templates (mysql.sql.j2 used here)
 ├── prompts/              # LLM prompt templates
 │
-├── schemas/              # [output] Extracted schemas
-├── mappings/
-│   ├── draft/            # [output] AI-proposed mappings (review these!)
-│   └── approved/         # [input]  Your approved mappings
-├── ddl/                  # [output] Generated DDL scripts
-├── reports/              # [output] Validation reports
-└── checkpoints/          # [output] Migration progress (for resume)
+├── schemas/              # [output] Extracted schemas (or schemas/<run-id>/...)
+├── mappings/             # [output/input] Column mappings
+│   ├── draft/            # [output] AI-proposed mappings (shared mode)
+│   └── approved/         # [input]  Your approved mappings (shared mode)
+├── ddl/                  # [output] Generated DDL scripts (or ddl/<run-id>/...)
+├── reports/              # [output] Validation reports (or reports/<run-id>/...)
+└── checkpoints/          # [output] Migration progress (for resume; per run-id)
 ```
 
 ---
@@ -223,6 +251,7 @@ The AI proposes mappings, but **you always review** before anything touches MySQ
 - Data moves in **chunks** (default 100K rows)
 - Every chunk is **checkpointed** — if it fails, rerun with `--run-id` to resume
 - `--dry-run` lets you preview DDL before applying
+- Optional `--run-id` lets you keep each migration run's files isolated in per-run folders
 
 ---
 

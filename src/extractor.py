@@ -16,7 +16,11 @@ from src.utils import ROOT_DIR, ensure_dirs
 log = logging.getLogger(__name__)
 
 
-def extract_schema(source: SourceConnector, config: dict) -> Path:
+def extract_schema(
+    source: SourceConnector,
+    config: dict,
+    run_id: str | None = None,
+) -> Path:
     """Extract full schema spec from the source database.
 
     Returns the path to the saved JSON file.
@@ -63,19 +67,28 @@ def extract_schema(source: SourceConnector, config: dict) -> Path:
         "tables": tables,
     }
 
-    out_path = ROOT_DIR / "schemas" / f"{database}.json"
+    base_dir = ROOT_DIR / "schemas"
+    if run_id:
+        base_dir = base_dir / run_id
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = base_dir / f"{database}.json"
     out_path.write_text(json.dumps(spec, indent=2, default=str), encoding="utf-8")
     log.info("Schema written to %s", out_path)
-    
-    # Also extract views and routines
-    extract_views(source, config)
-    extract_routines(source, config)
-    extract_triggers(source, config)
+
+    # Also extract views, routines, and triggers into the same run-scoped folder
+    extract_views(source, config, run_id=run_id)
+    extract_routines(source, config, run_id=run_id)
+    extract_triggers(source, config, run_id=run_id)
     
     return out_path
 
 
-def extract_views(source: SourceConnector, config: dict) -> None:
+def extract_views(
+    source: SourceConnector,
+    config: dict,
+    run_id: str | None = None,
+) -> None:
     """Extract view definitions from the source database."""
     src_cfg = config["source"]
     database = src_cfg["database"]
@@ -84,7 +97,10 @@ def extract_views(source: SourceConnector, config: dict) -> None:
         schemas = ["public"]
 
     log.info("Extracting views... %s", schemas)
-    views_dir = ROOT_DIR / "schemas" / "views"
+    views_base = ROOT_DIR / "schemas"
+    if run_id:
+        views_base = views_base / run_id
+    views_dir = views_base / "views"
     views_dir.mkdir(parents=True, exist_ok=True)
 
     for schema in schemas:
@@ -98,7 +114,11 @@ def extract_views(source: SourceConnector, config: dict) -> None:
                 out_file.write_text(definition, encoding="utf-8")
 
 
-def extract_routines(source: SourceConnector, config: dict) -> None:
+def extract_routines(
+    source: SourceConnector,
+    config: dict,
+    run_id: str | None = None,
+) -> None:
     """Extract routine (function/procedure) definitions."""
     src_cfg = config["source"]
     database = src_cfg["database"]
@@ -107,7 +127,10 @@ def extract_routines(source: SourceConnector, config: dict) -> None:
         schemas = ["public"]
 
     log.info("Extracting routines... %s", schemas)
-    routines_dir = ROOT_DIR / "schemas" / "routines"
+    routines_base = ROOT_DIR / "schemas"
+    if run_id:
+        routines_base = routines_base / run_id
+    routines_dir = routines_base / "routines"
     routines_dir.mkdir(parents=True, exist_ok=True)
 
     for schema in schemas:
@@ -122,7 +145,11 @@ def extract_routines(source: SourceConnector, config: dict) -> None:
                 out_file.write_text(definition, encoding="utf-8")
 
 
-def extract_triggers(source: SourceConnector, config: dict) -> None:
+def extract_triggers(
+    source: SourceConnector,
+    config: dict,
+    run_id: str | None = None,
+) -> None:
     """Extract trigger definitions."""
     src_cfg = config["source"]
     database = src_cfg["database"]
@@ -131,7 +158,10 @@ def extract_triggers(source: SourceConnector, config: dict) -> None:
         schemas = ["public"]
 
     log.info("Extracting triggers... %s", schemas)
-    triggers_dir = ROOT_DIR / "schemas" / "triggers"
+    triggers_base = ROOT_DIR / "schemas"
+    if run_id:
+        triggers_base = triggers_base / run_id
+    triggers_dir = triggers_base / "triggers"
     triggers_dir.mkdir(parents=True, exist_ok=True)
 
     for schema in schemas:
@@ -146,8 +176,12 @@ def extract_triggers(source: SourceConnector, config: dict) -> None:
                 out_file.write_text(definition, encoding="utf-8")
 
 
-def extract_stats(source: SourceConnector, config: dict,
-                  spec_path: Path) -> Path:
+def extract_stats(
+    source: SourceConnector,
+    config: dict,
+    spec_path: Path,
+    run_id: str | None = None,
+) -> Path:
     """Collect column statistics for all tables in the schema spec.
 
     Returns the path to the saved stats JSON.
@@ -166,7 +200,12 @@ def extract_stats(source: SourceConnector, config: dict,
         stats = source.get_column_stats(database, schema, name, col_names, sample)
         all_stats[f"{schema}.{name}"] = stats
 
-    out_path = ROOT_DIR / "stats" / f"{database}_stats.json"
+    stats_dir = ROOT_DIR / "stats"
+    if run_id:
+        stats_dir = stats_dir / run_id
+    stats_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = stats_dir / f"{database}_stats.json"
     out_path.write_text(json.dumps(all_stats, indent=2, default=str), encoding="utf-8")
     log.info("Stats written to %s", out_path)
     return out_path

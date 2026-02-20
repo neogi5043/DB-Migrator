@@ -13,12 +13,26 @@ from src.utils import ROOT_DIR, ensure_dirs, topological_sort
 log = logging.getLogger(__name__)
 
 
-def generate_ddl(target: TargetConnector, config: dict) -> list[Path]:
-    """Render DDL for all approved mappings and write to ddl/."""
+def generate_ddl(
+    target: TargetConnector,
+    config: dict,
+    run_id: str | None = None,
+) -> list[Path]:
+    """Render DDL for all approved mappings and write to ddl/.
+
+    If *run_id* is provided, use per-run subfolders:
+        mappings/<run_id>/approved, ddl/<run_id>/
+    Otherwise, fall back to the legacy shared folders.
+    """
     ensure_dirs()
     schema = config["target"].get("schema", "public")
-    approved_dir = ROOT_DIR / "mappings" / "approved"
-    ddl_dir = ROOT_DIR / "ddl"
+
+    if run_id:
+        approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
+        ddl_dir = ROOT_DIR / "ddl" / run_id
+    else:
+        approved_dir = ROOT_DIR / "mappings" / "approved"
+        ddl_dir = ROOT_DIR / "ddl"
     paths: list[Path] = []
 
     mapping_files = sorted(approved_dir.glob("*.json"))
@@ -48,12 +62,20 @@ def generate_ddl(target: TargetConnector, config: dict) -> list[Path]:
     return paths
 
 
-def apply_schema(target: TargetConnector, config: dict, dry_run: bool = True) -> None:
+def apply_schema(
+    target: TargetConnector,
+    config: dict,
+    dry_run: bool = True,
+    run_id: str | None = None,
+) -> None:
     """Apply DDL to target database.
 
     If *dry_run* is True, just print the DDL without executing.
     """
-    ddl_dir = ROOT_DIR / "ddl"
+    if run_id:
+        ddl_dir = ROOT_DIR / "ddl" / run_id
+    else:
+        ddl_dir = ROOT_DIR / "ddl"
     ddl_files = sorted(ddl_dir.glob("*.sql"))
 
     if not ddl_files:
@@ -76,8 +98,11 @@ def apply_schema(target: TargetConnector, config: dict, dry_run: bool = True) ->
 
     # Apply Views, Routines, Triggers
     for category in ["views", "routines", "triggers"]:
-        # Look in mappings/approved/{category}
-        cat_dir = ROOT_DIR / "mappings" / "approved" / category
+        # Look in mappings/approved/{category}, optionally scoped by run_id
+        if run_id:
+            cat_dir = ROOT_DIR / "mappings" / run_id / "approved" / category
+        else:
+            cat_dir = ROOT_DIR / "mappings" / "approved" / category
         if not cat_dir.exists():
             continue
         

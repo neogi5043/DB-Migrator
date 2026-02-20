@@ -172,12 +172,20 @@ def migrate_all(
     run_id: str | None = None,
     tables_filter: list[str] | None = None,
 ) -> list[dict]:
-    """Migrate all approved tables (or a filtered subset)."""
+    """Migrate all approved tables (or a filtered subset).
+
+    If *run_id* is provided, read approved mappings from
+    ``mappings/<run_id>/approved``. Otherwise, use the legacy
+    shared folder ``mappings/approved``.
+    """
     ensure_dirs()
     run_id = run_id or generate_run_id()
     log.info("Migration run: %s", run_id)
 
-    approved_dir = ROOT_DIR / "mappings" / "approved"
+    if run_id:
+        approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
+    else:
+        approved_dir = ROOT_DIR / "mappings" / "approved"
     results = []
 
     for mf in sorted(approved_dir.glob("*.json")):

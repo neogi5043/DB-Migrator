@@ -158,10 +158,21 @@ def validate_all(
     source: SourceConnector,
     target: TargetConnector,
     config: dict,
+    run_id: str | None = None,
 ) -> Path:
-    """Validate all approved mappings. Write report to reports/."""
+    """Validate all approved mappings. Write report to reports/.
+
+    If *run_id* is provided, use per-run folders:
+        mappings/<run_id>/approved, reports/<run_id>/
+    Otherwise, fall back to the legacy shared folders.
+    """
     ensure_dirs()
-    approved_dir = ROOT_DIR / "mappings" / "approved"
+    if run_id:
+        approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
+        reports_dir = ROOT_DIR / "reports" / run_id
+    else:
+        approved_dir = ROOT_DIR / "mappings" / "approved"
+        reports_dir = ROOT_DIR / "reports"
     results = []
 
     for mf in sorted(approved_dir.glob("*.json")):
@@ -180,7 +191,8 @@ def validate_all(
         "all_pass": all(r["pass"] for r in results),
     }
 
-    out = ROOT_DIR / "reports" / f"validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    out = reports_dir / f"validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     out.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     log.info("Validation report: %s", out)
     return out
