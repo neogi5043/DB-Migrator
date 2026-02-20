@@ -178,6 +178,8 @@ Then update the matching credentials in `.env`. Everything else stays the same.
   - `reports/<id>/...`
   - `checkpoints/<id>/...` (already per-run)
 
+The **web UI** automatically generates a fresh run ID every time you click *Extract* and reuses it for *Propose → Apply Schema → Migrate → Validate*, so runs stay isolated without you having to manage IDs yourself.
+
 This keeps artifacts from different runs from overwriting each other and makes it easy to compare, archive, or clean up specific runs.
 
 ---

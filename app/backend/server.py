@@ -11,6 +11,7 @@ import logging
 import shutil
 import sys
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
@@ -42,8 +43,43 @@ app.add_middleware(
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
+RUN_STATE_FILE = ROOT_DIR / "run_state.json"
+
+
 def _config() -> dict:
     return load_config()
+
+
+def _set_active_run_id(run_id: str) -> None:
+    """Persist the currently active run ID for the web UI pipeline."""
+    RUN_STATE_FILE.write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _get_active_run_id(required: bool = True) -> str | None:
+    """Return the current run ID (set by /api/extract).
+
+    If *required* is True and no run is active, raise HTTPException so the
+    caller can tell the user to run extraction first.
+    """
+    if RUN_STATE_FILE.exists():
+        try:
+            data = json.loads(RUN_STATE_FILE.read_text(encoding="utf-8"))
+            rid = data.get("run_id")
+            if rid:
+                return rid
+        except Exception:
+            log.warning("Failed to read run_state.json; ignoring.")
+    if required:
+        raise HTTPException(400, "No active run. Run extraction first.")
+    return None
 
 
 def _sse(data: dict) -> str:
@@ -87,8 +123,15 @@ def get_config():
 def list_tables():
     """List all draft and approved table mappings."""
     tables = []
+    run_id = _get_active_run_id(required=False)
     for status_dir in ["draft", "approved"]:
-        d = ROOT_DIR / "mappings" / status_dir
+        if run_id:
+            d = ROOT_DIR / "mappings" / run_id / status_dir
+            # Fallback to legacy layout if per-run folder doesn't exist
+            if not d.exists():
+                d = ROOT_DIR / "mappings" / status_dir
+        else:
+            d = ROOT_DIR / "mappings" / status_dir
         if not d.exists():
             continue
         for f in sorted(d.glob("*.json")):
@@ -107,8 +150,14 @@ def list_tables():
 @app.get("/api/mapping/{table}")
 def get_mapping(table: str):
     """Get column mapping for a table (check approved first, then draft)."""
+    run_id = _get_active_run_id(required=False)
     for status_dir in ["approved", "draft"]:
-        f = ROOT_DIR / "mappings" / status_dir / f"{table}.json"
+        if run_id:
+            f = ROOT_DIR / "mappings" / run_id / status_dir / f"{table}.json"
+            if not f.exists():
+                f = ROOT_DIR / "mappings" / status_dir / f"{table}.json"
+        else:
+            f = ROOT_DIR / "mappings" / status_dir / f"{table}.json"
         if f.exists():
             mapping = json.loads(f.read_text(encoding="utf-8"))
             return {"status": status_dir, "mapping": mapping}
@@ -118,8 +167,13 @@ def get_mapping(table: str):
 @app.post("/api/approve/{table}")
 def approve_table(table: str):
     """Move a table mapping from draft to approved."""
-    src = ROOT_DIR / "mappings" / "draft" / f"{table}.json"
-    dst = ROOT_DIR / "mappings" / "approved" / f"{table}.json"
+    run_id = _get_active_run_id(required=False)
+    if run_id:
+        src = ROOT_DIR / "mappings" / run_id / "draft" / f"{table}.json"
+        dst = ROOT_DIR / "mappings" / run_id / "approved" / f"{table}.json"
+    else:
+        src = ROOT_DIR / "mappings" / "draft" / f"{table}.json"
+        dst = ROOT_DIR / "mappings" / "approved" / f"{table}.json"
     if not src.exists():
         raise HTTPException(404, f"Draft not found: {table}")
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -130,8 +184,13 @@ def approve_table(table: str):
 @app.post("/api/approve-all")
 def approve_all():
     """Move all draft mappings to approved."""
-    draft_dir = ROOT_DIR / "mappings" / "draft"
-    approved_dir = ROOT_DIR / "mappings" / "approved"
+    run_id = _get_active_run_id(required=False)
+    if run_id:
+        draft_dir = ROOT_DIR / "mappings" / run_id / "draft"
+        approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
+    else:
+        draft_dir = ROOT_DIR / "mappings" / "draft"
+        approved_dir = ROOT_DIR / "mappings" / "approved"
     approved_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     if draft_dir.exists():
@@ -153,8 +212,14 @@ def approve_all():
 def list_views():
     """List view SQL files from approved/views."""
     views = []
+    run_id = _get_active_run_id(required=False)
     for status_dir in ["draft", "approved"]:
-        d = ROOT_DIR / "mappings" / status_dir / "views"
+        if run_id:
+            d = ROOT_DIR / "mappings" / run_id / status_dir / "views"
+            if not d.exists():
+                d = ROOT_DIR / "mappings" / status_dir / "views"
+        else:
+            d = ROOT_DIR / "mappings" / status_dir / "views"
         if not d.exists():
             continue
         for f in sorted(d.glob("*.sql")):
@@ -170,17 +235,21 @@ async def run_extract():
         yield _sse({"type": "log", "msg": "Connecting to source database..."})
         try:
             cfg = _config()
+            run_id = generate_run_id()
+            _set_active_run_id(run_id)
+            yield _sse({"type": "log", "msg": f"Run ID: {run_id}"})
+
             source = get_source(cfg["source"]["engine"])
             source.connect(cfg["source"])
             yield _sse({"type": "log", "msg": f"Connected to {cfg['source']['engine']}"})
 
             from src.extractor import extract_schema, extract_stats
             yield _sse({"type": "log", "msg": "Extracting schema..."})
-            spec_path = extract_schema(source, cfg)
+            spec_path = extract_schema(source, cfg, run_id=run_id)
             yield _sse({"type": "log", "msg": f"Schema extracted → {spec_path.name}"})
 
             yield _sse({"type": "log", "msg": "Collecting column statistics..."})
-            extract_stats(source, cfg, spec_path)
+            extract_stats(source, cfg, spec_path, run_id=run_id)
             yield _sse({"type": "log", "msg": "Statistics collected"})
 
             # Count tables
@@ -188,7 +257,7 @@ async def run_extract():
             n_tables = len(spec.get("tables", []))
             n_cols = sum(len(t.get("columns", [])) for t in spec.get("tables", []))
             yield _sse({"type": "log", "msg": f"✓ Extraction complete — {n_tables} tables, {n_cols} columns"})
-            yield _sse({"type": "done", "tables": n_tables, "columns": n_cols})
+            yield _sse({"type": "done", "tables": n_tables, "columns": n_cols, "run_id": run_id})
             source.close()
         except Exception as e:
             yield _sse({"type": "error", "msg": str(e)})
@@ -203,10 +272,11 @@ async def run_propose():
     async def stream():
         try:
             cfg = _config()
+            run_id = _get_active_run_id()
             from src.llm_client import build_llm, generate_mapping, translate_sql
 
             ensure_dirs()
-            spec_dir = ROOT_DIR / "schemas"
+            spec_dir = ROOT_DIR / "schemas" / run_id
             spec_files = list(spec_dir.glob("*.json"))
             if not spec_files:
                 yield _sse({"type": "error", "msg": "No schema specs found. Run extract first."})
@@ -215,6 +285,12 @@ async def run_propose():
             llm = build_llm(cfg)
             target_engine = cfg["target"]["engine"]
             target_schema = cfg["target"].get("schema", "public")
+
+            # Run-scoped mapping roots
+            draft_root = ROOT_DIR / "mappings" / run_id / "draft"
+            approved_root = ROOT_DIR / "mappings" / run_id / "approved"
+            draft_root.mkdir(parents=True, exist_ok=True)
+            approved_root.mkdir(parents=True, exist_ok=True)
 
             total = 0
             for spec_path in spec_files:
@@ -236,7 +312,7 @@ async def run_propose():
                     mapping["target_engine"] = target_engine
                     mapping["status"] = "draft"
 
-                    out = ROOT_DIR / "mappings" / "draft" / f"{table['name']}.json"
+                    out = draft_root / f"{table['name']}.json"
                     out.parent.mkdir(parents=True, exist_ok=True)
                     out.write_text(json.dumps(mapping, indent=2, default=str), encoding="utf-8")
 
@@ -247,10 +323,11 @@ async def run_propose():
 
             # Translate views
             for category in ["views", "routines", "triggers"]:
-                src_dir = ROOT_DIR / "schemas" / category
+                src_dir = spec_dir / category
                 if not src_dir.exists():
                     continue
-                draft_dir = ROOT_DIR / "mappings" / "draft" / category
+
+                draft_dir = draft_root / category
                 draft_dir.mkdir(parents=True, exist_ok=True)
                 ObjectTypeMap = {"views": "VIEW", "routines": "PROCEDURE/FUNCTION", "triggers": "TRIGGER"}
                 for sql_file in src_dir.glob("*.sql"):
@@ -280,18 +357,19 @@ async def run_apply_schema():
     async def stream():
         try:
             cfg = _config()
+            run_id = _get_active_run_id()
             from src.schema_gen import generate_ddl, apply_schema
 
             target = get_target(cfg["target"]["engine"])
             target.connect(cfg["target"])
             yield _sse({"type": "log", "msg": f"Connected to target {cfg['target']['engine']}"})
 
-            ddl_paths = generate_ddl(target, cfg)
+            ddl_paths = generate_ddl(target, cfg, run_id=run_id)
             yield _sse({"type": "log", "msg": f"Generated DDL for {len(ddl_paths)} tables"})
 
-            apply_schema(target, cfg, dry_run=False)
+            apply_schema(target, cfg, dry_run=False, run_id=run_id)
             yield _sse({"type": "log", "msg": f"✓ Schema applied ({len(ddl_paths)} tables)"})
-            yield _sse({"type": "done", "tables": len(ddl_paths)})
+            yield _sse({"type": "done", "tables": len(ddl_paths), "run_id": run_id})
             target.close()
         except Exception as e:
             yield _sse({"type": "error", "msg": str(e)})
@@ -306,6 +384,7 @@ async def run_migrate():
     async def stream():
         try:
             cfg = _config()
+            run_id = _get_active_run_id()
             from src.migrator import migrate_all
 
             source = get_source(cfg["source"]["engine"])
@@ -313,8 +392,6 @@ async def run_migrate():
             source.connect(cfg["source"])
             target.connect(cfg["target"])
             yield _sse({"type": "log", "msg": "Connected to source and target"})
-
-            run_id = generate_run_id()
             yield _sse({"type": "log", "msg": f"Migration run: {run_id}"})
 
             results = migrate_all(source, target, cfg, run_id)
@@ -345,6 +422,7 @@ async def run_validate():
     async def stream():
         try:
             cfg = _config()
+            run_id = _get_active_run_id()
             from src.validator import validate_all
 
             source = get_source(cfg["source"]["engine"])
@@ -353,7 +431,7 @@ async def run_validate():
             target.connect(cfg["target"])
             yield _sse({"type": "log", "msg": "Connected to source and target"})
 
-            report_path = validate_all(source, target, cfg)
+            report_path = validate_all(source, target, cfg, run_id=run_id)
             report = json.loads(report_path.read_text(encoding="utf-8"))
 
             for r in report.get("tables", []):
@@ -361,7 +439,7 @@ async def run_validate():
                 yield _sse({"type": "table_result", "result": r})
 
             yield _sse({"type": "log", "msg": f"Validation report: {report_path.name}"})
-            yield _sse({"type": "done", "all_pass": report["all_pass"], "report": str(report_path)})
+            yield _sse({"type": "done", "all_pass": report["all_pass"], "report": str(report_path), "run_id": run_id})
             source.close()
             target.close()
         except Exception as e:
