@@ -123,7 +123,7 @@ def approve_table(table: str):
     if not src.exists():
         raise HTTPException(404, f"Draft not found: {table}")
     dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(str(src), str(dst))
+    shutil.move(str(src), str(dst))
     return {"status": "approved", "table": table}
 
 
@@ -136,7 +136,7 @@ def approve_all():
     count = 0
     if draft_dir.exists():
         for f in draft_dir.glob("*.json"):
-            shutil.copy2(str(f), str(approved_dir / f.name))
+            shutil.move(str(f), str(approved_dir / f.name))
             count += 1
     # Also copy view SQL files
     draft_views = draft_dir / "views"
@@ -144,7 +144,7 @@ def approve_all():
         approved_views = approved_dir / "views"
         approved_views.mkdir(parents=True, exist_ok=True)
         for f in draft_views.glob("*.sql"):
-            shutil.copy2(str(f), str(approved_views / f.name))
+            shutil.move(str(f), str(approved_views / f.name))
             count += 1
     return {"approved": count}
 

@@ -922,11 +922,11 @@ export default function App() {
             }}>
                 {STEPS.map((s, i) => (
                     <div key={s.id} style={{ display: "flex", alignItems: "center" }}>
-                        <button onClick={() => i <= step && setStep(i)} style={{
+                        <div style={{
                             display: "flex", alignItems: "center", gap: 8,
                             padding: "14px 16px", border: "none", background: "transparent",
                             borderBottom: `2px solid ${i === step ? C.cyan : "transparent"}`,
-                            cursor: i <= step ? "pointer" : "default", transition: "all 0.2s",
+                            cursor: "default", pointerEvents: "none", opacity: i > step ? 0.6 : 1, transition: "all 0.2s",
                         }}>
                             <div style={{
                                 width: 22, height: 22, borderRadius: "50%",
@@ -943,7 +943,7 @@ export default function App() {
                                 style={{ fontWeight: i === step ? 600 : 400, letterSpacing: "0.06em", textTransform: "uppercase" }}>
                                 {s.label}
                             </Mono>
-                        </button>
+                        </div>
                         {i < STEPS.length - 1 && <PipelineArrow active={i < step} />}
                     </div>
                 ))}
