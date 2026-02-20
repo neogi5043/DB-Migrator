@@ -75,6 +75,5 @@ def topological_sort(tables: list[dict]) -> list[dict]:
 
 def ensure_dirs() -> None:
     """Create output directories if they don't exist."""
-    for d in ("schemas", "stats", "mappings/draft", "mappings/approved",
-              "ddl", "reports"):
+    for d in ("schemas", "stats", "ddl", "reports"):
         (ROOT_DIR / d).mkdir(parents=True, exist_ok=True)

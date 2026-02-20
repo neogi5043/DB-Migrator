@@ -23,6 +23,22 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.utils import load_config, setup_logging, ensure_dirs, generate_run_id, ROOT_DIR
+
+
+def _resolve_run_id(args) -> str | None:
+    """Resolve run_id from args or run_state.json."""
+    run_id = getattr(args, "run_id", None)
+    if run_id:
+        return run_id
+    
+    state_file = ROOT_DIR / "run_state.json"
+    if state_file.exists():
+        try:
+            data = json.loads(state_file.read_text(encoding="utf-8"))
+            return data.get("run_id")
+        except Exception:
+            pass
+    return None
 from src.connectors.registry import get_source, get_target, SOURCE_REGISTRY, TARGET_REGISTRY
 
 
@@ -47,28 +63,30 @@ def cmd_propose(args, config):
     """Generate LLM-powered mapping proposals for each table."""
     from src.llm_client import build_llm, generate_mapping
 
-    run_id = getattr(args, "run_id", None)
+    run_id = _resolve_run_id(args) or generate_run_id()
 
     ensure_dirs()
-    spec_dir = ROOT_DIR / "schemas"
-    if run_id:
-        spec_dir = spec_dir / run_id
+    spec_dir = ROOT_DIR / "schemas" / run_id
+    if not spec_dir.exists():
+        # Fallback to legacy shared folder ONLY for reading schemas if run-scoped one missing
+        # (Allows manual schema placement)
+        if not (ROOT_DIR / "schemas").exists():
+            print("✗ No schema specs found. Run 'extract' first.")
+            return
+        spec_dir = ROOT_DIR / "schemas"
+
     spec_files = list(spec_dir.glob("*.json"))
     if not spec_files:
-        print("✗ No schema specs found. Run 'extract' first.")
+        print(f"✗ No schema specs found in {spec_dir}. Run 'extract' first.")
         return
 
     llm = build_llm(config)
     target_engine = config["target"]["engine"]
     target_schema = config["target"].get("schema", "public")
 
-    # Decide run-scoped mapping roots
-    if run_id:
-        draft_root = ROOT_DIR / "mappings" / run_id / "draft"
-        approved_root = ROOT_DIR / "mappings" / run_id / "approved"
-    else:
-        draft_root = ROOT_DIR / "mappings" / "draft"
-        approved_root = ROOT_DIR / "mappings" / "approved"
+    # Run-scoped mapping roots ONLY
+    draft_root = ROOT_DIR / "mappings" / run_id / "draft"
+    approved_root = ROOT_DIR / "mappings" / run_id / "approved"
 
     draft_root.mkdir(parents=True, exist_ok=True)
     approved_root.mkdir(parents=True, exist_ok=True)
@@ -148,14 +166,14 @@ def cmd_propose(args, config):
 
 def cmd_validate_mapping(args, config):
     """Validate mapping JSON structure."""
-    run_id = getattr(args, "run_id", None)
+    run_id = _resolve_run_id(args)
     if args.path:
         path = Path(args.path)
     else:
-        if run_id:
-            path = ROOT_DIR / "mappings" / run_id / "approved"
-        else:
-            path = ROOT_DIR / "mappings" / "approved"
+        if not run_id:
+            print("✗ No run-id specified and no active run found in run_state.json.")
+            return
+        path = ROOT_DIR / "mappings" / run_id / "approved"
     files = list(path.glob("*.json")) if path.is_dir() else [path]
 
     if not files:
@@ -188,7 +206,7 @@ def cmd_apply_schema(args, config):
     """Generate and optionally apply DDL to target."""
     from src.schema_gen import generate_ddl, apply_schema
 
-    run_id = getattr(args, "run_id", None)
+    run_id = _resolve_run_id(args)
 
     target = get_target(config["target"]["engine"])
     if not args.dry_run:
@@ -221,7 +239,7 @@ def cmd_migrate(args, config):
     target.connect(config["target"])
 
     tables_filter = args.tables.split(",") if args.tables else None
-    run_id = args.run_id or generate_run_id()
+    run_id = _resolve_run_id(args) or generate_run_id()
 
     try:
         results = migrate_all(source, target, config, run_id, tables_filter)
@@ -239,7 +257,7 @@ def cmd_validate(args, config):
     """Run post-migration validation."""
     from src.validator import validate_all
 
-    run_id = getattr(args, "run_id", None)
+    run_id = _resolve_run_id(args)
 
     source = get_source(config["source"]["engine"])
     target = get_target(config["target"]["engine"])

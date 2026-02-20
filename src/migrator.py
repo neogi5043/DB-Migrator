@@ -147,8 +147,13 @@ def migrate_table(
                      offset, loaded, total_loaded)
         except Exception as e:
             log.error("Load failed at offset %d: %s", offset, e)
-            import traceback
-            traceback.print_exc()
+            
+            # If the table is missing, don't keep trying and skipping offsets!
+            err_msg = str(e).lower()
+            if "doesn't exist" in err_msg or "not found" in err_msg or "1146" in err_msg:
+                log.error("Fatal error: Target table %s missing. Stopping migration for this table.", table)
+                break
+
             failures += 1
             if failures >= max_failures:
                 log.error("Max failures reached for %s — stopping", table)
@@ -179,13 +184,22 @@ def migrate_all(
     shared folder ``mappings/approved``.
     """
     ensure_dirs()
-    run_id = run_id or generate_run_id()
+    if not run_id:
+        from src.cli import _resolve_run_id
+        resolved = _resolve_run_id(None)
+        run_id = resolved or generate_run_id()
     log.info("Migration run: %s", run_id)
 
     if run_id:
         approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
     else:
-        approved_dir = ROOT_DIR / "mappings" / "approved"
+        from src.cli import _resolve_run_id
+        resolved = _resolve_run_id(None)
+        if not resolved:
+            approved_dir = ROOT_DIR / "mappings" / "approved"
+        else:
+            approved_dir = ROOT_DIR / "mappings" / resolved / "approved"
+            run_id = resolved
     results = []
 
     for mf in sorted(approved_dir.glob("*.json")):

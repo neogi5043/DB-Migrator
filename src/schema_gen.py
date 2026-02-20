@@ -31,8 +31,18 @@ def generate_ddl(
         approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
         ddl_dir = ROOT_DIR / "ddl" / run_id
     else:
-        approved_dir = ROOT_DIR / "mappings" / "approved"
-        ddl_dir = ROOT_DIR / "ddl"
+        # Final fallback to active run from run_state.json if caller didn't pass it
+        from src.cli import _resolve_run_id
+        resolved = _resolve_run_id(None)
+        if not resolved:
+            log.warning("No run_id provided and no active run found. Defaulting to legacy paths (NOT RECOMMENDED).")
+            approved_dir = ROOT_DIR / "mappings" / "approved"
+            ddl_dir = ROOT_DIR / "ddl"
+        else:
+            approved_dir = ROOT_DIR / "mappings" / resolved / "approved"
+            ddl_dir = ROOT_DIR / "ddl" / resolved
+    
+    ddl_dir.mkdir(parents=True, exist_ok=True)
     paths: list[Path] = []
 
     mapping_files = sorted(approved_dir.glob("*.json"))
@@ -75,7 +85,9 @@ def apply_schema(
     if run_id:
         ddl_dir = ROOT_DIR / "ddl" / run_id
     else:
-        ddl_dir = ROOT_DIR / "ddl"
+        from src.cli import _resolve_run_id
+        resolved = _resolve_run_id(None)
+        ddl_dir = ROOT_DIR / "ddl" / resolved if resolved else ROOT_DIR / "ddl"
     ddl_files = sorted(ddl_dir.glob("*.sql"))
 
     if not ddl_files:
@@ -102,7 +114,11 @@ def apply_schema(
         if run_id:
             cat_dir = ROOT_DIR / "mappings" / run_id / "approved" / category
         else:
-            cat_dir = ROOT_DIR / "mappings" / "approved" / category
+            from src.cli import _resolve_run_id
+            resolved = _resolve_run_id(None)
+            cat_dir = ROOT_DIR / "mappings" / (resolved or "") / "approved" / category
+            if not resolved:
+                cat_dir = ROOT_DIR / "mappings" / "approved" / category
         if not cat_dir.exists():
             continue
         

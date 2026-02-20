@@ -1,0 +1,449 @@
+{
+  "source_table": "public.datasource_details_base",
+  "target_table": "bi_doctor_db.datasource_details_base",
+  "columns": [
+    {
+      "source": "row_id",
+      "target": "row_id",
+      "source_type_raw": "bigint",
+      "canonical_type": "INT8",
+      "target_type": "BIGINT",
+      "role": "primary_key",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_project_id",
+      "target": "wb_project_id",
+      "source_type_raw": "bigint",
+      "canonical_type": "INT8",
+      "target_type": "BIGINT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_project",
+      "target": "wb_project",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_id",
+      "target": "workbook_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook_luid",
+      "target": "workbook_luid",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "workbook",
+      "target": "workbook",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_created_date",
+      "target": "wb_created_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME(6)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_updated_date",
+      "target": "wb_updated_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME(6)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "wb_tags",
+      "target": "wb_tags",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "description",
+      "target": "description",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_id",
+      "target": "datasource_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource",
+      "target": "datasource",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_created_date",
+      "target": "ds_created_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME(6)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_updated_date",
+      "target": "ds_updated_date",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME(6)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_project_id",
+      "target": "ds_project_id",
+      "source_type_raw": "bigint",
+      "canonical_type": "INT8",
+      "target_type": "BIGINT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_project",
+      "target": "ds_project",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "ds_tags",
+      "target": "ds_tags",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "contains_extract",
+      "target": "contains_extract",
+      "source_type_raw": "boolean",
+      "canonical_type": "BOOL",
+      "target_type": "TINYINT(1)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_type",
+      "target": "datasource_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_id",
+      "target": "field_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_name",
+      "target": "field_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "field_type",
+      "target": "field_type",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(50)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "formula",
+      "target": "formula",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "table_name",
+      "target": "table_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "column_name",
+      "target": "column_name",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(100)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet_id",
+      "target": "sheet_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "sheet",
+      "target": "sheet",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "used_in_sheet",
+      "target": "used_in_sheet",
+      "source_type_raw": "character",
+      "canonical_type": "CHAR",
+      "target_type": "CHAR(1)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard_id",
+      "target": "dashboard_id",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "dashboard",
+      "target": "dashboard",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(255)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "custom_query",
+      "target": "custom_query",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "flag",
+      "target": "flag",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "file_name",
+      "target": "file_name",
+      "source_type_raw": "text",
+      "canonical_type": "CLOB",
+      "target_type": "LONGTEXT",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "load_time",
+      "target": "load_time",
+      "source_type_raw": "timestamp without time zone",
+      "canonical_type": "DATETIME",
+      "target_type": "DATETIME(6)",
+      "role": "null",
+      "nullable": false,
+      "transform": null,
+      "warnings": []
+    },
+    {
+      "source": "datasource_luid",
+      "target": "datasource_luid",
+      "source_type_raw": "character varying",
+      "canonical_type": "TEXT",
+      "target_type": "VARCHAR(36)",
+      "role": "null",
+      "nullable": true,
+      "transform": null,
+      "warnings": []
+    }
+  ],
+  "primary_key": [
+    "row_id"
+  ],
+  "foreign_keys": [],
+  "indexes": [
+    {
+      "name": "idx_ds_flag_wb",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "flag"
+      ]
+    },
+    {
+      "name": "idx_ds_flag_wb_ds",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id",
+        "flag"
+      ]
+    },
+    {
+      "name": "idx_ds_flag_wb_ds_col",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id",
+        "column_name",
+        "flag"
+      ]
+    },
+    {
+      "name": "idx_ds_flag_wb_ds_table",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "datasource_id",
+        "table_name",
+        "flag"
+      ]
+    },
+    {
+      "name": "idx_ds_flag_wb_field",
+      "unique": false,
+      "columns": [
+        "workbook_id",
+        "field_id",
+        "flag"
+      ]
+    }
+  ],
+  "warnings": [
+    "Column 'row_id' is SERIAL/IDENTITY in Postgres; map to BIGINT with auto-increment in MySQL."
+  ],
+  "source_engine": "postgres",
+  "target_engine": "mysql",
+  "status": "draft"
+}

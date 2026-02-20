@@ -1,0 +1,10 @@
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\content_details_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\custom_query_details_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\custom_query_details_hist.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\dashboard_details_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\dashboard_details_hist.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\datasource_details_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\datasource_details_hist.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\event_details_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\usage_statistics_base.json
+C:\Project\Internal\DB_Migrator\DB-Migrator\mappings\run-20260220-150742-5ca1fc\approved\usage_statistics_hist.json

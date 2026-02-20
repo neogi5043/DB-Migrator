@@ -86,7 +86,11 @@ def validate_table(
         log.warning("Source row count failed: %s", e)
         src_rows = -1
 
-    tgt_rows = target.get_row_count(fqn_tgt)
+    try:
+        tgt_rows = target.get_row_count(fqn_tgt)
+    except Exception as e:
+        log.warning("Target row count failed: %s", e)
+        tgt_rows = -1
 
     row_match = (
         abs(src_rows - tgt_rows) <= (src_rows * tolerance)
@@ -171,8 +175,14 @@ def validate_all(
         approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
         reports_dir = ROOT_DIR / "reports" / run_id
     else:
-        approved_dir = ROOT_DIR / "mappings" / "approved"
-        reports_dir = ROOT_DIR / "reports"
+        from src.cli import _resolve_run_id
+        resolved = _resolve_run_id(None)
+        if not resolved:
+            approved_dir = ROOT_DIR / "mappings" / "approved"
+            reports_dir = ROOT_DIR / "reports"
+        else:
+            approved_dir = ROOT_DIR / "mappings" / resolved / "approved"
+            reports_dir = ROOT_DIR / "reports" / resolved
     results = []
 
     for mf in sorted(approved_dir.glob("*.json")):

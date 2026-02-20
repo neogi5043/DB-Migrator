@@ -1,0 +1,1078 @@
+{
+  "public.content_details_base": {
+    "item_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 1042,
+      "min": "006322b9-4c68-41d2-b564-7740bf037fa8",
+      "max": "fffa3a48-b67c-4471-a68d-f493ab6222e3"
+    },
+    "item_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1005,
+      "min": "",
+      "max": "9870457.0"
+    },
+    "item_name": {
+      "null_rate": 0.0,
+      "distinct_count": 289,
+      "min": "Action Dashboard",
+      "max": "World Indicators"
+    },
+    "item_type": {
+      "null_rate": 0.0,
+      "distinct_count": 7,
+      "min": "Datasource",
+      "max": "Workbook"
+    },
+    "item_parent_project_name": {
+      "null_rate": 0.0,
+      "distinct_count": 22,
+      "min": "",
+      "max": "UAT"
+    },
+    "item_parent_project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 21,
+      "min": "",
+      "max": "877046.0"
+    },
+    "top_parent_project_name": {
+      "null_rate": 0.0,
+      "distinct_count": 17,
+      "min": "",
+      "max": "UAT"
+    },
+    "last_accessed_at": {
+      "null_rate": 0.6727447216890595,
+      "distinct_count": 242,
+      "min": "2025-11-10 11:15:51",
+      "max": "2026-02-08 03:03:56"
+    },
+    "owner_email": {
+      "null_rate": 0.0,
+      "distinct_count": 10,
+      "min": "",
+      "max": "tol.admin.api.broker.service.usera@tableau.com"
+    },
+    "item_hyperlink": {
+      "null_rate": 0.0,
+      "distinct_count": 837,
+      "min": "https://us-west-2b.online.tableau.com/pulse/site/exavalu/0475f760-cf43-4c39-a89f-5750e61c6e4f",
+      "max": "https://us-west-2b.online.tableau.com/#/site/exavalu/workbooks/2875212/datasources"
+    },
+    "total_size_mb": {
+      "null_rate": 0.4961612284069098,
+      "distinct_count": 165,
+      "min": "0",
+      "max": "41"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "2026-02-09 22:59:36.160213",
+      "max": "2026-02-09 22:59:36.160213"
+    }
+  },
+  "public.custom_query_details_base": {
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "697727",
+      "max": "697727"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Hands On",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "c19a8ea2-75f0-9976-6193-42c2405559e5",
+      "max": "c19a8ea2-75f0-9976-6193-42c2405559e5"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Sample Workbook",
+      "max": "Sample Workbook"
+    },
+    "custom_query_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "ddf7798c-9002-e1e3-eae8-0c1660554458",
+      "max": "ddf7798c-9002-e1e3-eae8-0c1660554458"
+    },
+    "custom_query": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Custom SQL Query",
+      "max": "Custom SQL Query"
+    },
+    "query": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Select City, Country, \"Customer Name\", Market, \"Customer ID\", \"Order Date\", \"Order ID\", \"Order Priority\", \"Product ID\", \"Product Name\", Region, \"Row ID\", \"Segment\", \"Ship Date\", \"Ship Mode\", State, \"Sub-Category\", Discount, Profit, Quantity, Sales, \"Shipping Cost\" FROM defaultdb.Orders WHERE Region LIKE '%C%' AND \"Order Date\" BETWEEN '2013-01-01' AND '2014-12-31'",
+      "max": "Select City, Country, \"Customer Name\", Market, \"Customer ID\", \"Order Date\", \"Order ID\", \"Order Priority\", \"Product ID\", \"Product Name\", Region, \"Row ID\", \"Segment\", \"Ship Date\", \"Ship Mode\", State, \"Sub-Category\", Discount, Profit, Quantity, Sales, \"Shipping Cost\" FROM defaultdb.Orders WHERE Region LIKE '%C%' AND \"Order Date\" BETWEEN '2013-01-01' AND '2014-12-31'"
+    },
+    "flag": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Workbook",
+      "max": "Workbook"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Tableau_Metadata_20260211_071124.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "2026-02-11 07:11:35.456316",
+      "max": "2026-02-11 07:11:35.456316"
+    }
+  },
+  "public.custom_query_details_hist": {
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "697727",
+      "max": "697727"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Hands On",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "c19a8ea2-75f0-9976-6193-42c2405559e5",
+      "max": "c19a8ea2-75f0-9976-6193-42c2405559e5"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Sample Workbook",
+      "max": "Sample Workbook"
+    },
+    "custom_query_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "ddf7798c-9002-e1e3-eae8-0c1660554458",
+      "max": "ddf7798c-9002-e1e3-eae8-0c1660554458"
+    },
+    "custom_query": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Custom SQL Query",
+      "max": "Custom SQL Query"
+    },
+    "query": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Select City, Country, \"Customer Name\", Market, \"Customer ID\", \"Order Date\", \"Order ID\", \"Order Priority\", \"Product ID\", \"Product Name\", Region, \"Row ID\", \"Segment\", \"Ship Date\", \"Ship Mode\", State, \"Sub-Category\", Discount, Profit, Quantity, Sales, \"Shipping Cost\" FROM defaultdb.Orders WHERE Region LIKE '%C%' AND \"Order Date\" BETWEEN '2013-01-01' AND '2014-12-31'",
+      "max": "Select City, Country, \"Customer Name\", Market, \"Customer ID\", \"Order Date\", \"Order ID\", \"Order Priority\", \"Product ID\", \"Product Name\", Region, \"Row ID\", \"Segment\", \"Ship Date\", \"Ship Mode\", State, \"Sub-Category\", Discount, Profit, Quantity, Sales, \"Shipping Cost\" FROM defaultdb.Orders WHERE Region LIKE '%C%' AND \"Order Date\" BETWEEN '2013-01-01' AND '2014-12-31'"
+    },
+    "flag": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Workbook",
+      "max": "Workbook"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "Tableau_Metadata_20260211_071124.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "2026-02-11 07:11:35.456316",
+      "max": "2026-02-11 07:11:35.456316"
+    }
+  },
+  "public.dashboard_details_base": {
+    "row_id": {
+      "null_rate": 0.0,
+      "distinct_count": 8172,
+      "min": "310884",
+      "max": "319055"
+    },
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "575799",
+      "max": "877046"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "default",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 13,
+      "min": "1839d252-2de1-a679-b078-f3ac85ce301c",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "Demo_dev_workbook_v1",
+      "max": "Tableau Training at Exavalu"
+    },
+    "workbook_owner_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "5d1e4f85-867c-d419-2390-02ce9e068286",
+      "max": "e1cc01c8-f513-3832-cf64-5f68e1fa5258"
+    },
+    "workbook_owner_username": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "anup.saha@exavalu.com",
+      "max": "sanket.tewary@exavalu.com"
+    },
+    "dashboard_id": {
+      "null_rate": 0.0,
+      "distinct_count": 103,
+      "min": "00b6b92a-1060-b733-357c-884c63c869e6",
+      "max": "ffcdb68d-0888-f785-e783-5d373c686765"
+    },
+    "dashboard": {
+      "null_rate": 0.0,
+      "distinct_count": 58,
+      "min": "Action Dashboard",
+      "max": "Underwriter Scorecard "
+    },
+    "sheet_id": {
+      "null_rate": 0.0,
+      "distinct_count": 486,
+      "min": "00da6db1-f328-ea42-5efb-b02b11f28586",
+      "max": "ff23934d-6ad9-408f-14aa-8f4d8d81d5a1"
+    },
+    "sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 256,
+      "min": "#Adjusted Claims",
+      "max": "YTD Quote Funnel"
+    },
+    "field_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1373,
+      "min": "003b31af-4421-0d7e-3af8-9184b83b1b9b",
+      "max": "ffe9d9b8-7363-73f0-ad91-d822ff20911f"
+    },
+    "field": {
+      "null_rate": 0.0,
+      "distinct_count": 594,
+      "min": "Account",
+      "max": "Ytd Flag (Quote Cycle)"
+    },
+    "field_type": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "BinField",
+      "max": "SetField"
+    },
+    "datasource_id": {
+      "null_rate": 0.0,
+      "distinct_count": 46,
+      "min": "00b8e17e-16fc-b6cb-bd35-3d4dfff9b442",
+      "max": "feb25110-a85f-e33b-9e2a-21e0eebab09a"
+    },
+    "datasource": {
+      "null_rate": 0.0,
+      "distinct_count": 29,
+      "min": "claim_fact+ (SmartAnalyticsDB)",
+      "max": "Underwriter Cycle Time (Underwriting Cycle Time)"
+    },
+    "table_name": {
+      "null_rate": 0.0,
+      "distinct_count": 30,
+      "min": "",
+      "max": "User"
+    },
+    "column_name": {
+      "null_rate": 0.0,
+      "distinct_count": 86,
+      "min": "",
+      "max": "Win_Probability__c"
+    },
+    "formula": {
+      "null_rate": 0.0,
+      "distinct_count": 405,
+      "min": "",
+      "max": "ZN([Total Sales]) / ZN([Total Closed Opportunities Amount])"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "Tableau_Metadata_20260208_150833.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "2026-02-09 20:43:19.582",
+      "max": "2026-02-11 09:46:10.30497"
+    }
+  },
+  "public.dashboard_details_hist": {
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "575799",
+      "max": "877046"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "default",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 13,
+      "min": "1839d252-2de1-a679-b078-f3ac85ce301c",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "Demo_dev_workbook_v1",
+      "max": "Tableau Training at Exavalu"
+    },
+    "workbook_owner_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "5d1e4f85-867c-d419-2390-02ce9e068286",
+      "max": "e1cc01c8-f513-3832-cf64-5f68e1fa5258"
+    },
+    "workbook_owner_username": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "anup.saha@exavalu.com",
+      "max": "sanket.tewary@exavalu.com"
+    },
+    "dashboard_id": {
+      "null_rate": 0.0,
+      "distinct_count": 103,
+      "min": "00b6b92a-1060-b733-357c-884c63c869e6",
+      "max": "ffcdb68d-0888-f785-e783-5d373c686765"
+    },
+    "dashboard": {
+      "null_rate": 0.0,
+      "distinct_count": 58,
+      "min": "Action Dashboard",
+      "max": "Underwriter Scorecard "
+    },
+    "sheet_id": {
+      "null_rate": 0.0,
+      "distinct_count": 486,
+      "min": "00da6db1-f328-ea42-5efb-b02b11f28586",
+      "max": "ff23934d-6ad9-408f-14aa-8f4d8d81d5a1"
+    },
+    "sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 256,
+      "min": "#Adjusted Claims",
+      "max": "YTD Quote Funnel"
+    },
+    "field_id": {
+      "null_rate": 0.0,
+      "distinct_count": 1373,
+      "min": "003b31af-4421-0d7e-3af8-9184b83b1b9b",
+      "max": "ffe9d9b8-7363-73f0-ad91-d822ff20911f"
+    },
+    "field": {
+      "null_rate": 0.0,
+      "distinct_count": 594,
+      "min": "Account",
+      "max": "Ytd Flag (Quote Cycle)"
+    },
+    "field_type": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "BinField",
+      "max": "SetField"
+    },
+    "datasource_id": {
+      "null_rate": 0.0,
+      "distinct_count": 47,
+      "min": "",
+      "max": "feb25110-a85f-e33b-9e2a-21e0eebab09a"
+    },
+    "datasource": {
+      "null_rate": 0.0,
+      "distinct_count": 30,
+      "min": "",
+      "max": "Underwriter Cycle Time (Underwriting Cycle Time)"
+    },
+    "table_name": {
+      "null_rate": 0.0,
+      "distinct_count": 30,
+      "min": "",
+      "max": "User"
+    },
+    "column_name": {
+      "null_rate": 0.0,
+      "distinct_count": 86,
+      "min": "",
+      "max": "Win_Probability__c"
+    },
+    "formula": {
+      "null_rate": 0.0,
+      "distinct_count": 464,
+      "min": "",
+      "max": "ZN([Total Sales]) / ZN([Total Closed Opportunities Amount])"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "Tableau_Metadata_20260207_150604.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "2026-02-07 15:06:04",
+      "max": "2026-02-11 09:46:10.30497"
+    }
+  },
+  "public.datasource_details_base": {
+    "row_id": {
+      "null_rate": 0.0,
+      "distinct_count": 3926,
+      "min": "259477",
+      "max": "263402"
+    },
+    "wb_project_id": {
+      "null_rate": 0.0781966377992868,
+      "distinct_count": 6,
+      "min": "575799",
+      "max": "1591017"
+    },
+    "wb_project": {
+      "null_rate": 0.0,
+      "distinct_count": 7,
+      "min": "",
+      "max": "Report test"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "f09b1c5b-7f8c-4d55-9848-066a322381c9"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 13,
+      "min": "",
+      "max": "WB_PP"
+    },
+    "wb_created_date": {
+      "null_rate": 0.0781966377992868,
+      "distinct_count": 14,
+      "min": "2024-03-27 08:54:52",
+      "max": "2026-01-09 15:12:46"
+    },
+    "wb_updated_date": {
+      "null_rate": 0.0781966377992868,
+      "distinct_count": 14,
+      "min": "2024-07-05 13:54:18",
+      "max": "2026-01-10 14:31:42"
+    },
+    "wb_tags": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "[]"
+    },
+    "description": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "workbook connected to ds_pp"
+    },
+    "datasource_id": {
+      "null_rate": 0.0,
+      "distinct_count": 34,
+      "min": "00b8e17e-16fc-b6cb-bd35-3d4dfff9b442",
+      "max": "feb25110-a85f-e33b-9e2a-21e0eebab09a"
+    },
+    "datasource": {
+      "null_rate": 0.0,
+      "distinct_count": 28,
+      "min": "Business Insights",
+      "max": "Underwriter Cycle Time (Underwriting Cycle Time)"
+    },
+    "ds_created_date": {
+      "null_rate": 0.0,
+      "distinct_count": 20,
+      "min": "2024-03-27 08:54:52",
+      "max": "2025-12-11 07:57:25"
+    },
+    "ds_updated_date": {
+      "null_rate": 0.0,
+      "distinct_count": 20,
+      "min": "2024-03-27 08:54:57",
+      "max": "2025-12-11 08:02:16"
+    },
+    "ds_project_id": {
+      "null_rate": 0.8415690269994905,
+      "distinct_count": 3,
+      "min": "575799",
+      "max": "765631"
+    },
+    "ds_project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "",
+      "max": "Samples"
+    },
+    "ds_tags": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "",
+      "max": ""
+    },
+    "contains_extract": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "0",
+      "max": "1"
+    },
+    "datasource_type": {
+      "null_rate": 0.0,
+      "distinct_count": 3,
+      "min": "Custom SQL",
+      "max": "PublishedDatasource"
+    },
+    "field_id": {
+      "null_rate": 0.0,
+      "distinct_count": 3171,
+      "min": "000dc5d6-31bd-23a8-0c71-28dbd6c6db2d",
+      "max": "ffff19e6-9370-d5a9-7ddc-b78dc2a9a174"
+    },
+    "field_name": {
+      "null_rate": 0.0,
+      "distinct_count": 1764,
+      "min": "500K<Sales>50K Set",
+      "max": "Zip/Postal Code"
+    },
+    "field_type": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "BinField",
+      "max": "SetField"
+    },
+    "formula": {
+      "null_rate": 0.0,
+      "distinct_count": 276,
+      "min": "",
+      "max": "ZN([Total Sales]) / ZN([Total Closed Opportunities Amount])"
+    },
+    "table_name": {
+      "null_rate": 0.0,
+      "distinct_count": 43,
+      "min": "",
+      "max": "User"
+    },
+    "column_name": {
+      "null_rate": 0.0,
+      "distinct_count": 760,
+      "min": "",
+      "max": "yearstartdate"
+    },
+    "sheet_id": {
+      "null_rate": 0.0,
+      "distinct_count": 19,
+      "min": "",
+      "max": "faeabd82-77af-d9f9-abc6-f9f8150e96d9"
+    },
+    "sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "",
+      "max": "Total Sales - Ranking (for Selected Opp Owner)"
+    },
+    "used_in_sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "N",
+      "max": "Y"
+    },
+    "dashboard_id": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "",
+      "max": "f92a42b1-777e-4025-e265-c669aad52352"
+    },
+    "dashboard": {
+      "null_rate": 0.0,
+      "distinct_count": 12,
+      "min": "",
+      "max": "Underwriter Portfolio Summary"
+    },
+    "custom_query": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "ddf7798c-9002-e1e3-eae8-0c1660554458"
+    },
+    "flag": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "Datasource",
+      "max": "Workbook"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "Tableau_Metadata_20260208_150833.xlsx",
+      "max": "Tableau_Metadata_20260211_071318.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "2026-02-09 20:43:19.582",
+      "max": "2026-02-11 09:46:10.30497"
+    },
+    "datasource_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 9,
+      "min": "",
+      "max": "ec5ec9d9-54c3-4f03-ae2a-d2823c4bd23b"
+    }
+  },
+  "public.datasource_details_hist": {
+    "wb_project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 7,
+      "min": "",
+      "max": "877046"
+    },
+    "wb_project": {
+      "null_rate": 0.0,
+      "distinct_count": 7,
+      "min": "",
+      "max": "Report test"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "f09b1c5b-7f8c-4d55-9848-066a322381c9"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 13,
+      "min": "",
+      "max": "WB_PP"
+    },
+    "wb_created_date": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "2026-01-09T15:12:46Z"
+    },
+    "wb_updated_date": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "",
+      "max": "2026-01-10T14:31:42Z"
+    },
+    "wb_tags": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "[]"
+    },
+    "description": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "workbook connected to ds_pp"
+    },
+    "datasource_id": {
+      "null_rate": 0.0,
+      "distinct_count": 34,
+      "min": "00b8e17e-16fc-b6cb-bd35-3d4dfff9b442",
+      "max": "feb25110-a85f-e33b-9e2a-21e0eebab09a"
+    },
+    "datasource": {
+      "null_rate": 0.0,
+      "distinct_count": 28,
+      "min": "Business Insights",
+      "max": "Underwriter Cycle Time (Underwriting Cycle Time)"
+    },
+    "ds_created_date": {
+      "null_rate": 0.0,
+      "distinct_count": 20,
+      "min": "2024-03-27T08:54:52Z",
+      "max": "2025-12-11T07:57:25Z"
+    },
+    "ds_updated_date": {
+      "null_rate": 0.0,
+      "distinct_count": 20,
+      "min": "2024-03-27T08:54:57Z",
+      "max": "2025-12-11T08:02:16Z"
+    },
+    "ds_project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "",
+      "max": "765631"
+    },
+    "ds_project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "",
+      "max": "Samples"
+    },
+    "ds_tags": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "",
+      "max": ""
+    },
+    "contains_extract": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "False",
+      "max": "True"
+    },
+    "datasource_type": {
+      "null_rate": 0.0,
+      "distinct_count": 3,
+      "min": "Custom SQL",
+      "max": "PublishedDatasource"
+    },
+    "field_id": {
+      "null_rate": 0.0,
+      "distinct_count": 3171,
+      "min": "000dc5d6-31bd-23a8-0c71-28dbd6c6db2d",
+      "max": "ffff19e6-9370-d5a9-7ddc-b78dc2a9a174"
+    },
+    "field_name": {
+      "null_rate": 0.0,
+      "distinct_count": 1764,
+      "min": "500K<Sales>50K Set",
+      "max": "Zip/Postal Code"
+    },
+    "field_type": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "BinField",
+      "max": "SetField"
+    },
+    "formula": {
+      "null_rate": 0.0,
+      "distinct_count": 318,
+      "min": "",
+      "max": "ZN([Total Sales]) / ZN([Total Closed Opportunities Amount])"
+    },
+    "table": {
+      "null_rate": 0.0,
+      "distinct_count": 43,
+      "min": "",
+      "max": "User"
+    },
+    "column": {
+      "null_rate": 0.0,
+      "distinct_count": 760,
+      "min": "",
+      "max": "yearstartdate"
+    },
+    "sheet_id": {
+      "null_rate": 0.0,
+      "distinct_count": 19,
+      "min": "",
+      "max": "faeabd82-77af-d9f9-abc6-f9f8150e96d9"
+    },
+    "sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "",
+      "max": "Total Sales - Ranking (for Selected Opp Owner)"
+    },
+    "used_in_sheet": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "N",
+      "max": "Y"
+    },
+    "dashboard_id": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "",
+      "max": "f92a42b1-777e-4025-e265-c669aad52352"
+    },
+    "dashboard": {
+      "null_rate": 0.0,
+      "distinct_count": 12,
+      "min": "",
+      "max": "Underwriter Portfolio Summary"
+    },
+    "custom_query": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "",
+      "max": "ddf7798c-9002-e1e3-eae8-0c1660554458"
+    },
+    "flag": {
+      "null_rate": 0.0,
+      "distinct_count": 2,
+      "min": "Datasource",
+      "max": "Workbook"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "Tableau_Metadata_20260207_150604.xlsx",
+      "max": "Tableau_Metadata_20260211_071318.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "2026-02-07 15:06:04",
+      "max": "2026-02-11 09:46:10.30497"
+    },
+    "datasource_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 9,
+      "min": "",
+      "max": "ec5ec9d9-54c3-4f03-ae2a-d2823c4bd23b"
+    }
+  },
+  "public.event_details_base": {
+    "event_id": {
+      "null_rate": 0.0,
+      "distinct_count": 6172,
+      "min": "6876586575",
+      "max": "7467341714"
+    },
+    "event_date": {
+      "null_rate": 0.0,
+      "distinct_count": 4002,
+      "min": "2025-11-03 00:12:00",
+      "max": "2026-02-01 08:25:11"
+    },
+    "event_type": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "Access",
+      "max": "Update"
+    },
+    "event_name": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "Access Data Source",
+      "max": "Update Workbook"
+    },
+    "item_type": {
+      "null_rate": 0.0,
+      "distinct_count": 3,
+      "min": "Data Source",
+      "max": "Workbook"
+    },
+    "item_name": {
+      "null_rate": 0.0,
+      "distinct_count": 115,
+      "min": "",
+      "max": "Workbook Summary"
+    },
+    "item_luid": {
+      "null_rate": 0.0,
+      "distinct_count": 495,
+      "min": "",
+      "max": "ff9141f0-13d6-4811-ab4d-22261ec35fec"
+    },
+    "user_id": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "2225439",
+      "max": "3308419"
+    },
+    "user_name": {
+      "null_rate": 0.0,
+      "distinct_count": 14,
+      "min": "anup.saha@exavalu.com",
+      "max": "swapnendu.banerjee@exavalu.com"
+    },
+    "user_role": {
+      "null_rate": 0.0,
+      "distinct_count": 3,
+      "min": "Creator",
+      "max": "Viewer"
+    },
+    "sync_date": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "2026-02-01 16:04:35",
+      "max": "2026-02-01 16:04:35"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 1,
+      "min": "2026-02-05 03:01:15.994633",
+      "max": "2026-02-05 03:01:15.994633"
+    }
+  },
+  "public.usage_statistics_base": {
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "575799",
+      "max": "877046"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "default",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "2c1f29b3-6626-60dc-da51-0b2c7781a72a",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 10,
+      "min": "Demo_dev_workbook_v1",
+      "max": "Tableau Training at Exavalu"
+    },
+    "view_id": {
+      "null_rate": 0.0,
+      "distinct_count": 87,
+      "min": "03348a19-0882-4281-acd8-f2f379025d11",
+      "max": "fb150aeb-4794-4b69-95e9-9fd9132e22ae"
+    },
+    "view": {
+      "null_rate": 0.0,
+      "distinct_count": 61,
+      "min": "Action Dashboard",
+      "max": "What If Forecast"
+    },
+    "created_at": {
+      "null_rate": 0.0,
+      "distinct_count": 16,
+      "min": "2024-03-27 08:54:52",
+      "max": "2025-12-11 07:57:25"
+    },
+    "updated_at": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "2024-03-27 08:54:52",
+      "max": "2025-12-11 07:57:25"
+    },
+    "total_views": {
+      "null_rate": 0.0,
+      "distinct_count": 28,
+      "min": "0",
+      "max": "250"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "Tableau_Metadata_20260208_150833.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 6,
+      "min": "2026-02-09 20:43:19.582",
+      "max": "2026-02-11 09:46:10.30497"
+    }
+  },
+  "public.usage_statistics_hist": {
+    "project_id": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "575799",
+      "max": "877046"
+    },
+    "project": {
+      "null_rate": 0.0,
+      "distinct_count": 4,
+      "min": "default",
+      "max": "Hands On"
+    },
+    "workbook_id": {
+      "null_rate": 0.0,
+      "distinct_count": 11,
+      "min": "2c1f29b3-6626-60dc-da51-0b2c7781a72a",
+      "max": "e63765f2-0ff9-a7b9-0552-0a39075c04d6"
+    },
+    "workbook": {
+      "null_rate": 0.0,
+      "distinct_count": 10,
+      "min": "Demo_dev_workbook_v1",
+      "max": "Tableau Training at Exavalu"
+    },
+    "view_id": {
+      "null_rate": 0.0,
+      "distinct_count": 87,
+      "min": "03348a19-0882-4281-acd8-f2f379025d11",
+      "max": "fb150aeb-4794-4b69-95e9-9fd9132e22ae"
+    },
+    "view": {
+      "null_rate": 0.0,
+      "distinct_count": 61,
+      "min": "Action Dashboard",
+      "max": "What If Forecast"
+    },
+    "created_at": {
+      "null_rate": 0.0,
+      "distinct_count": 16,
+      "min": "2024-03-27T08:54:52Z",
+      "max": "2025-12-11T07:57:25Z"
+    },
+    "updated_at": {
+      "null_rate": 0.0,
+      "distinct_count": 15,
+      "min": "2024-03-27T08:54:52Z",
+      "max": "2025-12-11T07:57:25Z"
+    },
+    "total_views": {
+      "null_rate": 0.0,
+      "distinct_count": 28,
+      "min": "0",
+      "max": "250"
+    },
+    "file_name": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "Tableau_Metadata_20260207_150604.xlsx",
+      "max": "Tableau_Metadata_20260211_071124.xlsx"
+    },
+    "load_time": {
+      "null_rate": 0.0,
+      "distinct_count": 8,
+      "min": "2026-02-07 15:06:04",
+      "max": "2026-02-11 09:46:10.30497"
+    }
+  }
+}

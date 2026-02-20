@@ -43,9 +43,6 @@ app.add_middleware(
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-RUN_STATE_FILE = ROOT_DIR / "run_state.json"
-
-
 def _config() -> dict:
     return load_config()
 
@@ -80,6 +77,9 @@ def _get_active_run_id(required: bool = True) -> str | None:
     if required:
         raise HTTPException(400, "No active run. Run extraction first.")
     return None
+
+
+RUN_STATE_FILE = ROOT_DIR / "run_state.json"
 
 
 def _sse(data: dict) -> str:
@@ -124,14 +124,11 @@ def list_tables():
     """List all draft and approved table mappings."""
     tables = []
     run_id = _get_active_run_id(required=False)
+    if not run_id:
+        return {"tables": []}
+
     for status_dir in ["draft", "approved"]:
-        if run_id:
-            d = ROOT_DIR / "mappings" / run_id / status_dir
-            # Fallback to legacy layout if per-run folder doesn't exist
-            if not d.exists():
-                d = ROOT_DIR / "mappings" / status_dir
-        else:
-            d = ROOT_DIR / "mappings" / status_dir
+        d = ROOT_DIR / "mappings" / run_id / status_dir
         if not d.exists():
             continue
         for f in sorted(d.glob("*.json")):
@@ -150,32 +147,24 @@ def list_tables():
 @app.get("/api/mapping/{table}")
 def get_mapping(table: str):
     """Get column mapping for a table (check approved first, then draft)."""
-    run_id = _get_active_run_id(required=False)
+    run_id = _get_active_run_id(required=True)
     for status_dir in ["approved", "draft"]:
-        if run_id:
-            f = ROOT_DIR / "mappings" / run_id / status_dir / f"{table}.json"
-            if not f.exists():
-                f = ROOT_DIR / "mappings" / status_dir / f"{table}.json"
-        else:
-            f = ROOT_DIR / "mappings" / status_dir / f"{table}.json"
+        f = ROOT_DIR / "mappings" / run_id / status_dir / f"{table}.json"
         if f.exists():
             mapping = json.loads(f.read_text(encoding="utf-8"))
             return {"status": status_dir, "mapping": mapping}
-    raise HTTPException(404, f"Mapping not found: {table}")
+    raise HTTPException(404, f"Mapping not found for table {table} in run {run_id}")
 
 
 @app.post("/api/approve/{table}")
 def approve_table(table: str):
     """Move a table mapping from draft to approved."""
-    run_id = _get_active_run_id(required=False)
-    if run_id:
-        src = ROOT_DIR / "mappings" / run_id / "draft" / f"{table}.json"
-        dst = ROOT_DIR / "mappings" / run_id / "approved" / f"{table}.json"
-    else:
-        src = ROOT_DIR / "mappings" / "draft" / f"{table}.json"
-        dst = ROOT_DIR / "mappings" / "approved" / f"{table}.json"
+    run_id = _get_active_run_id(required=True)
+    src = ROOT_DIR / "mappings" / run_id / "draft" / f"{table}.json"
+    dst = ROOT_DIR / "mappings" / run_id / "approved" / f"{table}.json"
+    
     if not src.exists():
-        raise HTTPException(404, f"Draft not found: {table}")
+        raise HTTPException(404, f"Draft mapping not found for table {table} in run {run_id}")
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(str(src), str(dst))
     return {"status": "approved", "table": table}
@@ -184,27 +173,24 @@ def approve_table(table: str):
 @app.post("/api/approve-all")
 def approve_all():
     """Move all draft mappings to approved."""
-    run_id = _get_active_run_id(required=False)
-    if run_id:
-        draft_dir = ROOT_DIR / "mappings" / run_id / "draft"
-        approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
-    else:
-        draft_dir = ROOT_DIR / "mappings" / "draft"
-        approved_dir = ROOT_DIR / "mappings" / "approved"
+    run_id = _get_active_run_id(required=True)
+    draft_dir = ROOT_DIR / "mappings" / run_id / "draft"
+    approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
     approved_dir.mkdir(parents=True, exist_ok=True)
     count = 0
     if draft_dir.exists():
         for f in draft_dir.glob("*.json"):
             shutil.move(str(f), str(approved_dir / f.name))
             count += 1
-    # Also copy view SQL files
-    draft_views = draft_dir / "views"
-    if draft_views.exists():
-        approved_views = approved_dir / "views"
-        approved_views.mkdir(parents=True, exist_ok=True)
-        for f in draft_views.glob("*.sql"):
-            shutil.move(str(f), str(approved_views / f.name))
-            count += 1
+    # Also copy views, routines, triggers
+    for category in ["views", "routines", "triggers"]:
+        draft_cat = ROOT_DIR / "mappings" / run_id / "draft" / category
+        if draft_cat.exists():
+            approved_cat = ROOT_DIR / "mappings" / run_id / "approved" / category
+            approved_cat.mkdir(parents=True, exist_ok=True)
+            for f in draft_cat.glob("*.sql"):
+                shutil.move(str(f), str(approved_cat / f.name))
+                count += 1
     return {"approved": count}
 
 
@@ -213,17 +199,16 @@ def list_views():
     """List view SQL files from approved/views."""
     views = []
     run_id = _get_active_run_id(required=False)
+    if not run_id:
+        return {"views": []}
+        
     for status_dir in ["draft", "approved"]:
-        if run_id:
-            d = ROOT_DIR / "mappings" / run_id / status_dir / "views"
+        for category in ["views", "routines", "triggers"]:
+            d = ROOT_DIR / "mappings" / run_id / status_dir / category
             if not d.exists():
-                d = ROOT_DIR / "mappings" / status_dir / "views"
-        else:
-            d = ROOT_DIR / "mappings" / status_dir / "views"
-        if not d.exists():
-            continue
-        for f in sorted(d.glob("*.sql")):
-            views.append({"name": f.stem, "status": status_dir, "file": f.name})
+                continue
+            for f in sorted(d.glob("*.sql")):
+                views.append({"name": f.stem, "status": status_dir, "category": category, "file": f.name})
     return {"views": views}
 
 
@@ -384,7 +369,6 @@ async def run_migrate():
     async def stream():
         try:
             cfg = _config()
-            run_id = _get_active_run_id()
             from src.migrator import migrate_all
 
             source = get_source(cfg["source"]["engine"])
@@ -392,6 +376,8 @@ async def run_migrate():
             source.connect(cfg["source"])
             target.connect(cfg["target"])
             yield _sse({"type": "log", "msg": "Connected to source and target"})
+
+            run_id = _get_active_run_id()
             yield _sse({"type": "log", "msg": f"Migration run: {run_id}"})
 
             results = migrate_all(source, target, cfg, run_id)
