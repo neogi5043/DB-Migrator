@@ -105,8 +105,9 @@ python src/cli.py extract
 python src/cli.py propose
 
 # Step 3: Review the drafts
-#   Open files in mappings/draft/
-#   Edit if needed, then move to mappings/approved/
+#   Open files in mappings/<run-id>/draft/
+#   Review tables, views, routines, and triggers
+#   Edit if needed, then move to mappings/<run-id>/approved/
 
 # Step 4: Preview the MySQL DDL (safe, no changes)
 python src/cli.py apply-schema --dry-run
@@ -153,12 +154,12 @@ Then update the matching credentials in `.env`. Everything else stays the same.
 
 | Command | What It Does |
 |---------|-------------|
-| `python src/cli.py extract [--run-id <id>]` | Reads source schema → saves to `schemas/` or `schemas/<id>/` when `--run-id` is used |
-| `python src/cli.py propose [--run-id <id>]` | AI generates column mappings → saves to `mappings/draft/` or `mappings/<id>/draft/` |
-| `python src/cli.py validate-mapping [path] [--run-id <id>]` | Checks a mapping file or all files in `mappings[/<id>]/approved/` for errors |
-| `python src/cli.py apply-schema --dry-run [--run-id <id>]` | Shows the DDL that *would* run (safe preview) from `mappings[/<id>]/approved/` |
-| `python src/cli.py apply-schema --apply [--run-id <id>]` | Runs the DDL on MySQL (optionally scoped to `ddl/<id>/`) |
-| `python src/cli.py migrate [--run-id <id>]` | Moves all data in chunks (restartable) using `mappings[/<id>]/approved/` and `checkpoints/<id>/` |
+| `python src/cli.py extract [--run-id <id>]` | Reads source schema → saves to `schemas/<id>/` |
+| `python src/cli.py propose [--run-id <id>]` | AI generates column mappings + translates views, routines, triggers → saves to `mappings/<id>/draft/` |
+| `python src/cli.py validate-mapping [path] [--run-id <id>]` | Checks a mapping file or all files in `mappings/<id>/approved/` for errors |
+| `python src/cli.py apply-schema --dry-run [--run-id <id>]` | Shows the DDL that *would* run (safe preview) from `mappings/<id>/approved/` |
+| `python src/cli.py apply-schema --apply [--run-id <id>]` | Runs the DDL on MySQL (saved in `ddl/<id>/`) |
+| `python src/cli.py migrate [--run-id <id>]` | Moves all data in chunks (restartable) using `mappings/<id>/approved/` and `checkpoints/<id>/` |
 | `python src/cli.py migrate --tables orders` | Migrate a single table |
 | `python src/cli.py migrate --run-id <id>` | Resume a failed migration |
 | `python src/cli.py validate [--run-id <id>]` | Compares source vs target row counts and values, writing reports (optionally `reports/<id>/`) |
@@ -169,18 +170,19 @@ Then update the matching credentials in `.env`. Everything else stays the same.
 
 ## Run IDs & Per‑Run Folders
 
-- **Without `--run-id`**: all commands use shared top-level folders (e.g. `schemas/`, `mappings/draft/`, `ddl/`, `reports/`) — this matches the original behavior.
-- **With `--run-id <id>`**: outputs for that run are isolated under per-run subfolders:
+- **Run IDs are now mandatory**: The pipeline will always generate a unique Run ID (e.g. `run-20240101-120000-abcdef`) if you don't provide one via `--run-id`. 
+- **Isolated State**: This ID is saved to `run_state.json` so sequential CLI commands automatically discover the active run.
+- Outputs for the run are strictly isolated under per-run subfolders:
   - `schemas/<id>/...`
   - `stats/<id>/...`
   - `mappings/<id>/draft/` and `mappings/<id>/approved/`
   - `ddl/<id>/...`
   - `reports/<id>/...`
-  - `checkpoints/<id>/...` (already per-run)
+  - `checkpoints/<id>/...`
 
-The **web UI** automatically generates a fresh run ID every time you click *Extract* and reuses it for *Propose → Apply Schema → Migrate → Validate*, so runs stay isolated without you having to manage IDs yourself.
+The **web UI** and CLI automatically generate a fresh run ID every time you click/run *Extract* and reuse it for *Propose → Apply Schema → Migrate → Validate*, so runs stay isolated without you having to manage IDs yourself continuously.
 
-This keeps artifacts from different runs from overwriting each other and makes it easy to compare, archive, or clean up specific runs.
+This keeps artifacts from different database runs from overwriting each other and makes it easy to compare, archive, or clean up specific runs.
 
 ---
 
@@ -206,12 +208,12 @@ DB Migrator/
 ├── templates/            # DDL templates (mysql.sql.j2 used here)
 ├── prompts/              # LLM prompt templates
 │
-├── schemas/              # [output] Extracted schemas (or schemas/<run-id>/...)
-├── mappings/             # [output/input] Column mappings
-│   ├── draft/            # [output] AI-proposed mappings (shared mode)
-│   └── approved/         # [input]  Your approved mappings (shared mode)
-├── ddl/                  # [output] Generated DDL scripts (or ddl/<run-id>/...)
-├── reports/              # [output] Validation reports (or reports/<run-id>/...)
+├── schemas/              # [output] Extracted schemas, views, routines, triggers (schemas/<run-id>/...)
+├── mappings/             # [output/input] Column mappings, and translated views/routines/triggers
+│   ├── <run-id>/draft/   # [output] AI-proposed mappings and translations
+│   └── <run-id>/approved/# [input]  Your approved mappings and translations
+├── ddl/                  # [output] Generated DDL scripts (ddl/<run-id>/...)
+├── reports/              # [output] Validation reports (reports/<run-id>/...)
 └── checkpoints/          # [output] Migration progress (for resume; per run-id)
 ```
 
