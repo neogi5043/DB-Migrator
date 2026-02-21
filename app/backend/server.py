@@ -56,9 +56,12 @@ async def basic_auth_middleware(request, call_next):
             username, password = decoded.split(":", 1)
             
             from dotenv import dotenv_values
-            env_vars = dotenv_values(PROJECT_ROOT / ".env")
-            valid_user = env_vars.get("ADMIN_USERNAME", "admin")
-            valid_pass = env_vars.get("ADMIN_PASSWORD", "admin123")
+            env_vars = {}
+            if (PROJECT_ROOT / ".env").exists():
+                env_vars = dotenv_values(PROJECT_ROOT / ".env")
+                
+            valid_user = env_vars.get("ADMIN_USERNAME") or os.environ.get("ADMIN_USERNAME", "admin")
+            valid_pass = env_vars.get("ADMIN_PASSWORD") or os.environ.get("ADMIN_PASSWORD", "admin123")
             
             if not secrets.compare_digest(username, valid_user) or not secrets.compare_digest(password, valid_pass):
                 from fastapi.responses import JSONResponse
