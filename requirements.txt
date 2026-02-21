@@ -3,7 +3,8 @@ pyyaml>=6.0
 jinja2>=3.1
 pydantic>=2.0
 python-dotenv>=1.0
-
+polars
+tenacity
 # LLM - Azure OpenAI via LangChain
 langchain>=0.3.0
 langchain-openai>=0.3.0

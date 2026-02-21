@@ -8,6 +8,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import secrets
+import base64
 import shutil
 import sys
 import traceback
@@ -41,10 +44,74 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def basic_auth_middleware(request, call_next):
+    if request.url.path.startswith("/api"):
+        auth = request.headers.get("Authorization")
+        if not auth or not auth.startswith("Basic "):
+            from fastapi.responses import JSONResponse
+            return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
+        try:
+            decoded = base64.b64decode(auth[6:]).decode("utf-8")
+            username, password = decoded.split(":", 1)
+            
+            from dotenv import dotenv_values
+            env_vars = dotenv_values(PROJECT_ROOT / ".env")
+            valid_user = env_vars.get("ADMIN_USERNAME", "admin")
+            valid_pass = env_vars.get("ADMIN_PASSWORD", "admin123")
+            
+            if not secrets.compare_digest(username, valid_user) or not secrets.compare_digest(password, valid_pass):
+                from fastapi.responses import JSONResponse
+                return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
+        except Exception:
+            from fastapi.responses import JSONResponse
+            return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
+    return await call_next(request)
+
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-def _config() -> dict:
-    return load_config()
+def _config(payload: ConfigPayload | None = None) -> dict:
+    cfg = load_config()
+    if payload:
+        # Override source
+        if payload.sourceEngine:
+            cfg["source"]["engine"] = payload.sourceEngine
+        engine = cfg["source"]["engine"]
+        if engine not in cfg["source"]:
+            cfg["source"][engine] = {}
+        if payload.sourceHost: cfg["source"][engine]["host"] = payload.sourceHost
+        if payload.sourcePort: cfg["source"][engine]["port"] = payload.sourcePort
+        if payload.sourceDb: 
+            cfg["source"]["database"] = payload.sourceDb
+            cfg["source"][engine]["database"] = payload.sourceDb
+        if payload.sourceUser: cfg["source"][engine]["user"] = payload.sourceUser
+        if payload.sourcePass: cfg["source"][engine]["password"] = payload.sourcePass
+        
+        # Override target
+        if payload.targetEngine:
+            cfg["target"]["engine"] = payload.targetEngine
+        engine = cfg["target"]["engine"]
+        if engine not in cfg["target"]:
+            cfg["target"][engine] = {}
+        if payload.targetHost: cfg["target"][engine]["host"] = payload.targetHost
+        if payload.targetPort: cfg["target"][engine]["port"] = payload.targetPort
+        if payload.targetDb: 
+            cfg["target"]["schema"] = payload.targetDb
+            cfg["target"][engine]["database"] = payload.targetDb
+        if payload.targetUser: cfg["target"][engine]["user"] = payload.targetUser
+        if payload.targetPass: cfg["target"][engine]["password"] = payload.targetPass
+
+        # LLM
+        if payload.llmProvider: cfg.setdefault("llm", {})["provider"] = payload.llmProvider
+        if payload.azureDeployment: cfg.setdefault("llm", {})["azure_deployment"] = payload.azureDeployment
+        if payload.azureEndpoint: cfg.setdefault("llm", {})["azure_endpoint"] = payload.azureEndpoint
+
+        # Migration
+        if payload.chunkSize and payload.chunkSize.isdigit(): 
+            cfg.setdefault("migration", {})["chunk_size"] = int(payload.chunkSize)
+        cfg.setdefault("migration", {})["disable_fk_during_load"] = payload.disableFk
+
+    return cfg
 
 
 def _set_active_run_id(run_id: str) -> None:
@@ -89,21 +156,23 @@ def _sse(data: dict) -> str:
 # ── Models ─────────────────────────────────────────────────────────────────
 
 class ConfigPayload(BaseModel):
-    source_engine: str = "postgres"
-    source_host: str = ""
-    source_port: str = "5432"
-    source_db: str = ""
-    source_schema: str = ""
-    target_engine: str = "mysql"
-    target_host: str = ""
-    target_port: str = "3306"
-    target_db: str = ""
-    target_schema: str = ""
-    llm_provider: str = "azure_openai"
-    llm_model: str = ""
-    llm_key: str = ""
-    chunk_size: int = 5000
-    disable_fk: bool = True
+    sourceEngine: str = "postgres"
+    sourceHost: str = ""
+    sourcePort: str = "5432"
+    sourceDb: str = ""
+    sourceUser: str = ""
+    sourcePass: str = ""
+    targetEngine: str = "mysql"
+    targetHost: str = ""
+    targetPort: str = "3306"
+    targetDb: str = ""
+    targetUser: str = ""
+    targetPass: str = ""
+    llmProvider: str = "azure_openai"
+    azureDeployment: str = ""
+    azureEndpoint: str = ""
+    chunkSize: str = "5000"
+    disableFk: bool = True
 
 
 # ── Routes: Config ─────────────────────────────────────────────────────────
@@ -115,6 +184,25 @@ def get_config():
         return cfg
     except Exception as e:
         raise HTTPException(500, str(e))
+
+@app.post("/api/test-connection/{side}")
+async def test_connection(side: str, payload: ConfigPayload):
+    try:
+        cfg = _config(payload)
+        import asyncio
+        if side == "source":
+            conn = get_source(cfg["source"]["engine"])
+            await asyncio.to_thread(conn.connect, cfg["source"])
+            await asyncio.to_thread(conn.close)
+        elif side == "target":
+            conn = get_target(cfg["target"]["engine"])
+            await asyncio.to_thread(conn.connect, cfg["target"])
+            await asyncio.to_thread(conn.close)
+        else:
+            raise HTTPException(400, "Invalid side")
+        return {"status": "success", "message": f"Successfully connected to {side} database"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # ── Routes: Tables & Mappings ──────────────────────────────────────────────
@@ -215,37 +303,55 @@ def list_views():
 # ── Routes: Extract (SSE) ──────────────────────────────────────────────────
 
 @app.post("/api/extract")
-async def run_extract():
-    async def stream():
-        yield _sse({"type": "log", "msg": "Connecting to source database..."})
+async def run_extract(payload: ConfigPayload = None):
+    import threading, queue
+    q = queue.Queue()
+
+    def worker():
         try:
-            cfg = _config()
+            cfg = _config(payload)
             run_id = generate_run_id()
             _set_active_run_id(run_id)
-            yield _sse({"type": "log", "msg": f"Run ID: {run_id}"})
+            q.put({"type": "log", "msg": f"Run ID: {run_id}"})
 
             source = get_source(cfg["source"]["engine"])
             source.connect(cfg["source"])
-            yield _sse({"type": "log", "msg": f"Connected to {cfg['source']['engine']}"})
+            q.put({"type": "log", "msg": f"Connected to {cfg['source']['engine']}"})
 
             from src.extractor import extract_schema, extract_stats
-            yield _sse({"type": "log", "msg": "Extracting schema..."})
-            spec_path = extract_schema(source, cfg, run_id=run_id)
-            yield _sse({"type": "log", "msg": f"Schema extracted → {spec_path.name}"})
+            q.put({"type": "log", "msg": "Extracting schema..."})
+            
+            def progress(msg, done, total):
+                q.put({"type": "progress", "msg": msg, "done": done, "total": total})
 
-            yield _sse({"type": "log", "msg": "Collecting column statistics..."})
+            spec_path = extract_schema(source, cfg, run_id=run_id, on_progress=progress)
+            q.put({"type": "log", "msg": f"Schema extracted → {spec_path.name}"})
+
+            q.put({"type": "log", "msg": "Collecting column statistics..."})
             extract_stats(source, cfg, spec_path, run_id=run_id)
-            yield _sse({"type": "log", "msg": "Statistics collected"})
+            q.put({"type": "log", "msg": "Statistics collected"})
 
             # Count tables
             spec = json.loads(spec_path.read_text(encoding="utf-8"))
             n_tables = len(spec.get("tables", []))
             n_cols = sum(len(t.get("columns", [])) for t in spec.get("tables", []))
-            yield _sse({"type": "log", "msg": f"✓ Extraction complete — {n_tables} tables, {n_cols} columns"})
-            yield _sse({"type": "done", "tables": n_tables, "columns": n_cols, "run_id": run_id})
+            q.put({"type": "log", "msg": f"✓ Extraction complete — {n_tables} tables, {n_cols} columns"})
+            q.put({"type": "done", "tables": n_tables, "columns": n_cols, "run_id": run_id})
             source.close()
         except Exception as e:
-            yield _sse({"type": "error", "msg": str(e)})
+            q.put({"type": "error", "msg": str(e)})
+        finally:
+            q.put(None)
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    async def stream():
+        yield _sse({"type": "log", "msg": "Connecting to source database..."})
+        while True:
+            item = await asyncio.to_thread(q.get)
+            if item is None:
+                break
+            yield _sse(item)
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
@@ -253,10 +359,13 @@ async def run_extract():
 # ── Routes: Propose (SSE) ─────────────────────────────────────────────────
 
 @app.post("/api/propose")
-async def run_propose():
-    async def stream():
+async def run_propose(payload: ConfigPayload = None):
+    import threading, queue, concurrent.futures
+    q = queue.Queue()
+
+    def worker():
         try:
-            cfg = _config()
+            cfg = _config(payload)
             run_id = _get_active_run_id()
             from src.llm_client import build_llm, generate_mapping, translate_sql
 
@@ -264,7 +373,7 @@ async def run_propose():
             spec_dir = ROOT_DIR / "schemas" / run_id
             spec_files = list(spec_dir.glob("*.json"))
             if not spec_files:
-                yield _sse({"type": "error", "msg": "No schema specs found. Run extract first."})
+                q.put({"type": "error", "msg": "No schema specs found. Run extract first."})
                 return
 
             llm = build_llm(cfg)
@@ -277,36 +386,45 @@ async def run_propose():
             draft_root.mkdir(parents=True, exist_ok=True)
             approved_root.mkdir(parents=True, exist_ok=True)
 
-            total = 0
+            tasks = []
             for spec_path in spec_files:
                 spec = json.loads(spec_path.read_text(encoding="utf-8"))
                 source_engine = spec["source_engine"]
                 for table in spec["tables"]:
-                    total += 1
+                    tasks.append((source_engine, table))
 
+            total = len(tasks)
             done = 0
-            for spec_path in spec_files:
-                spec = json.loads(spec_path.read_text(encoding="utf-8"))
-                source_engine = spec["source_engine"]
-                for table in spec["tables"]:
-                    name = f"{table['schema']}.{table['name']}"
-                    yield _sse({"type": "log", "msg": f"Proposing mapping for {name}..."})
 
-                    mapping = generate_mapping(llm, source_engine, target_engine, target_schema, table)
-                    mapping["source_engine"] = source_engine
-                    mapping["target_engine"] = target_engine
-                    mapping["status"] = "draft"
+            def process_table(se, tbl):
+                name = f"{tbl['schema']}.{tbl['name']}"
+                q.put({"type": "log", "msg": f"Proposing mapping for {name}..."})
+                mapping = generate_mapping(llm, se, target_engine, target_schema, tbl)
+                mapping["source_engine"] = se
+                mapping["target_engine"] = target_engine
+                mapping["status"] = "draft"
+                out = draft_root / f"{tbl['name']}.json"
+                out.parent.mkdir(parents=True, exist_ok=True)
+                out.write_text(json.dumps(mapping, indent=2, default=str), encoding="utf-8")
+                return tbl["name"], len(mapping.get("columns", []))
 
-                    out = draft_root / f"{table['name']}.json"
-                    out.parent.mkdir(parents=True, exist_ok=True)
-                    out.write_text(json.dumps(mapping, indent=2, default=str), encoding="utf-8")
+            # Execute LLM API calls concurrently (up to 5 parallel threads)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                futures = {executor.submit(process_table, se, t): t["name"] for se, t in tasks}
+                for future in concurrent.futures.as_completed(futures):
+                    tname = futures[future]
+                    try:
+                        _, ncols = future.result()
+                        done += 1
+                        q.put({"type": "progress", "done": done, "total": total, "current": tname})
+                        q.put({"type": "log", "msg": f"✓ {tname} — {ncols} columns"})
+                    except Exception as e:
+                        q.put({"type": "error", "msg": f"Failed on {tname}: {str(e)}"})
+                        # Still count as done to advance progress slightly, but it failed
+                        done += 1
+                        q.put({"type": "progress", "done": done, "total": total, "current": tname})
 
-                    done += 1
-                    yield _sse({"type": "progress", "done": done, "total": total, "current": table["name"]})
-                    yield _sse({"type": "log", "msg": f"✓ {table['name']} — {len(mapping.get('columns', []))} columns"})
-                    await asyncio.sleep(0.05)  # yield control
-
-            # Translate views
+            # Translate views sequentially
             for category in ["views", "routines", "triggers"]:
                 src_dir = spec_dir / category
                 if not src_dir.exists():
@@ -316,7 +434,7 @@ async def run_propose():
                 draft_dir.mkdir(parents=True, exist_ok=True)
                 ObjectTypeMap = {"views": "VIEW", "routines": "PROCEDURE/FUNCTION", "triggers": "TRIGGER"}
                 for sql_file in src_dir.glob("*.sql"):
-                    yield _sse({"type": "log", "msg": f"Translating {category[:-1]}: {sql_file.name}..."})
+                    q.put({"type": "log", "msg": f"Translating {category[:-1]}: {sql_file.name}..."})
                     sql_code = sql_file.read_text(encoding="utf-8")
                     translated = translate_sql(
                         llm, cfg["source"]["engine"], cfg["target"]["engine"],
@@ -325,12 +443,22 @@ async def run_propose():
                     )
                     tgt_file = draft_dir / sql_file.name
                     tgt_file.write_text(translated, encoding="utf-8")
-                    yield _sse({"type": "log", "msg": f"✓ {sql_file.name} translated"})
-                    await asyncio.sleep(0.05)
+                    q.put({"type": "log", "msg": f"✓ {sql_file.name} translated"})
 
-            yield _sse({"type": "done", "tables": done})
+            q.put({"type": "done", "tables": done})
         except Exception as e:
-            yield _sse({"type": "error", "msg": str(e)})
+            q.put({"type": "error", "msg": str(e)})
+        finally:
+            q.put(None)
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    async def stream():
+        while True:
+            item = await asyncio.to_thread(q.get)
+            if item is None:
+                break
+            yield _sse(item)
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
@@ -338,21 +466,22 @@ async def run_propose():
 # ── Routes: Apply Schema (SSE) ────────────────────────────────────────────
 
 @app.post("/api/apply-schema")
-async def run_apply_schema():
+async def run_apply_schema(payload: ConfigPayload = None):
     async def stream():
         try:
-            cfg = _config()
+            cfg = _config(payload)
             run_id = _get_active_run_id()
             from src.schema_gen import generate_ddl, apply_schema
 
+            import asyncio
             target = get_target(cfg["target"]["engine"])
-            target.connect(cfg["target"])
+            await asyncio.to_thread(target.connect, cfg["target"])
             yield _sse({"type": "log", "msg": f"Connected to target {cfg['target']['engine']}"})
 
-            ddl_paths = generate_ddl(target, cfg, run_id=run_id)
+            ddl_paths = await asyncio.to_thread(generate_ddl, target, cfg, run_id=run_id)
             yield _sse({"type": "log", "msg": f"Generated DDL for {len(ddl_paths)} tables"})
 
-            apply_schema(target, cfg, dry_run=False, run_id=run_id)
+            await asyncio.to_thread(apply_schema, target, cfg, dry_run=False, run_id=run_id)
             yield _sse({"type": "log", "msg": f"✓ Schema applied ({len(ddl_paths)} tables)"})
             yield _sse({"type": "done", "tables": len(ddl_paths), "run_id": run_id})
             target.close()
@@ -365,30 +494,48 @@ async def run_apply_schema():
 # ── Routes: Migrate (SSE) ─────────────────────────────────────────────────
 
 @app.post("/api/migrate")
-async def run_migrate():
+async def run_migrate(payload: ConfigPayload = None):
     async def stream():
         try:
-            cfg = _config()
-            from src.migrator import migrate_all
+            cfg = _config(payload)
+            import asyncio
+            from src.migrator import migrate_table
 
             source = get_source(cfg["source"]["engine"])
             target = get_target(cfg["target"]["engine"])
-            source.connect(cfg["source"])
-            target.connect(cfg["target"])
+            await asyncio.to_thread(source.connect, cfg["source"])
+            await asyncio.to_thread(target.connect, cfg["target"])
             yield _sse({"type": "log", "msg": "Connected to source and target"})
 
             run_id = _get_active_run_id()
             yield _sse({"type": "log", "msg": f"Migration run: {run_id}"})
 
-            results = migrate_all(source, target, cfg, run_id)
-            for r in results:
-                yield _sse({
-                    "type": "table_done",
-                    "table": r["table"],
-                    "rows": r["rows_loaded"],
-                    "failures": r["failures"],
-                })
-                yield _sse({"type": "log", "msg": f"✓ {r['table']} — {r['rows_loaded']:,} rows"})
+            results = []
+            approved_dir = ROOT_DIR / "mappings" / run_id / "approved"
+            if approved_dir.exists():
+                for mf in sorted(approved_dir.glob("*.json")):
+                    mapping = json.loads(mf.read_text(encoding="utf-8"))
+                    try:
+                        r = await asyncio.to_thread(migrate_table, source, target, cfg, mapping, run_id)
+                        results.append(r)
+                        yield _sse({
+                            "type": "table_done",
+                            "table": r["table"],
+                            "rows": r["rows_loaded"],
+                            "failures": r["failures"],
+                        })
+                        yield _sse({"type": "log", "msg": f"✓ {r['table']} — {r['rows_loaded']:,} rows"})
+                    except Exception as e:
+                        tname = mapping.get("target_table", mapping.get("source_table", "Unknown"))
+                        r = {"table": tname, "rows_loaded": 0, "failures": 1}
+                        results.append(r)
+                        yield _sse({
+                            "type": "table_done",
+                            "table": tname,
+                            "rows": 0, 
+                            "failures": 1
+                        })
+                        yield _sse({"type": "log", "msg": f"✗ Migrating {tname} failed: {str(e)}"})
 
             total = sum(r["rows_loaded"] for r in results)
             yield _sse({"type": "log", "msg": f"✓ Migration complete. {total:,} total rows."})
@@ -404,20 +551,21 @@ async def run_migrate():
 # ── Routes: Validate (SSE) ────────────────────────────────────────────────
 
 @app.post("/api/validate")
-async def run_validate():
+async def run_validate(payload: ConfigPayload = None):
     async def stream():
         try:
-            cfg = _config()
+            cfg = _config(payload)
             run_id = _get_active_run_id()
+            import asyncio
             from src.validator import validate_all
 
             source = get_source(cfg["source"]["engine"])
             target = get_target(cfg["target"]["engine"])
-            source.connect(cfg["source"])
-            target.connect(cfg["target"])
+            await asyncio.to_thread(source.connect, cfg["source"])
+            await asyncio.to_thread(target.connect, cfg["target"])
             yield _sse({"type": "log", "msg": "Connected to source and target"})
 
-            report_path = validate_all(source, target, cfg, run_id=run_id)
+            report_path = await asyncio.to_thread(validate_all, source, target, cfg, run_id=run_id)
             report = json.loads(report_path.read_text(encoding="utf-8"))
 
             for r in report.get("tables", []):
@@ -432,7 +580,24 @@ async def run_validate():
             yield _sse({"type": "error", "msg": traceback.format_exc()})
 
     return StreamingResponse(stream(), media_type="text/event-stream")
-    # these are for production
+
+
+@app.get("/api/dlq/{run_id}/download")
+async def download_dlq(run_id: str):
+    import shutil
+    dlq_dir = ROOT_DIR / "dlq" / run_id
+    if not dlq_dir.exists() or not any(dlq_dir.iterdir()):
+        return {"error": "No DLQ files found for this run."}
+        
+    zip_path = ROOT_DIR / "dlq" / f"{run_id}_failed_rows"
+    shutil.make_archive(str(zip_path), 'zip', str(dlq_dir))
+    
+    from starlette.responses import FileResponse
+    return FileResponse(
+        path=f"{zip_path}.zip", 
+        filename=f"migration_dlq_{run_id}.zip", 
+        media_type="application/zip"
+    )
 
 
 # ── Serve Frontend (production) ────────────────────────────────────────

@@ -7,19 +7,30 @@
 const BASE = "";  // Vite proxy handles /api → localhost:8000
 
 export async function fetchJSON(path) {
-    const res = await fetch(`${BASE}${path}`);
+    const headers = {};
+    const auth = localStorage.getItem("dbAdminAuth");
+    if (auth) headers["Authorization"] = auth;
+    const res = await fetch(`${BASE}${path}`, { headers });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res.json();
 }
 
 export async function postJSON(path, body = {}) {
+    const headers = { "Content-Type": "application/json" };
+    const auth = localStorage.getItem("dbAdminAuth");
+    if (auth) headers["Authorization"] = auth;
+
     const res = await fetch(`${BASE}${path}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res.json();
+}
+
+export async function testConnection(side, config) {
+    return postJSON(`/api/test-connection/${side}`, config);
 }
 
 /**
@@ -28,8 +39,16 @@ export async function postJSON(path, body = {}) {
  * @param {function} onEvent  called with each parsed JSON event
  * @returns {Promise<void>}
  */
-export async function streamSSE(path, onEvent) {
-    const res = await fetch(`${BASE}${path}`, { method: "POST" });
+export async function streamSSE(path, body, onEvent) {
+    const req = { method: "POST", headers: {} };
+    const auth = localStorage.getItem("dbAdminAuth");
+    if (auth) req.headers["Authorization"] = auth;
+
+    if (body) {
+        req.headers["Content-Type"] = "application/json";
+        req.body = JSON.stringify(body);
+    }
+    const res = await fetch(`${BASE}${path}`, req);
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -66,8 +85,8 @@ export const getViews = () => fetchJSON("/api/views");
 export const approveTable = (table) => postJSON(`/api/approve/${table}`);
 export const approveAll = () => postJSON("/api/approve-all");
 
-export const runExtract = (onEvent) => streamSSE("/api/extract", onEvent);
-export const runPropose = (onEvent) => streamSSE("/api/propose", onEvent);
-export const runApplySchema = (onEvent) => streamSSE("/api/apply-schema", onEvent);
-export const runMigrate = (onEvent) => streamSSE("/api/migrate", onEvent);
-export const runValidate = (onEvent) => streamSSE("/api/validate", onEvent);
+export const runExtract = (body, onEvent) => streamSSE("/api/extract", body, onEvent);
+export const runPropose = (body, onEvent) => streamSSE("/api/propose", body, onEvent);
+export const runApplySchema = (body, onEvent) => streamSSE("/api/apply-schema", body, onEvent);
+export const runMigrate = (body, onEvent) => streamSSE("/api/migrate", body, onEvent);
+export const runValidate = (body, onEvent) => streamSSE("/api/validate", body, onEvent);

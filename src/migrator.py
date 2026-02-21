@@ -5,6 +5,7 @@ Uses OFFSET/LIMIT chunking so it works with any PK type (text, UUID, int).
 """
 from __future__ import annotations
 
+import csv
 import json
 import logging
 from datetime import datetime, timezone
@@ -43,37 +44,90 @@ def _save_checkpoint(run_id: str, table: str, last_offset: int, rows_loaded: int
 
 
 def _apply_transforms(rows: list[dict], columns: list[dict]) -> list[dict]:
-    """Apply Python-side type coercions per the mapping spec."""
-    for row in rows:
-        for col in columns:
-            name = col.get("target", col.get("source", ""))
-            src_name = col.get("source", name)
-            if src_name not in row:
-                continue
-            val = row[src_name]
+    """Apply type coercions per the mapping spec using Polars vectorization."""
+    if not rows:
+        return []
+        
+    import polars as pl
+    
+    # Fast load into dataframe, inferring schema from the first 500 rows.
+    # Unmatched objects (LOBs, specific precision Decimals) default to Object space
+    df = pl.from_dicts(rows, infer_schema_length=500)
+    
+    exprs = []
+    rename_map = {}
+    target_cols = []
+    
+    for col in columns:
+        name = col.get("target", col.get("source", ""))
+        src_name = col.get("source", name)
+        target_cols.append(name)
+        
+        if src_name not in df.columns:
+            exprs.append(pl.lit(None).alias(name))
+            continue
+            
+        if src_name != name:
+            rename_map[src_name] = name
+            
+        canonical = col.get("canonical_type", "")
+        dt = df.schema.get(src_name)
+        
+        # Boolean coercion
+        if canonical == "BOOL" and dt in [pl.Int8, pl.Int16, pl.Int32, pl.Int64]:
+            exprs.append(pl.col(src_name).cast(pl.Boolean).alias(src_name))
+            
+        # Decimal -> Float 
+        elif dt == pl.Decimal:
+            exprs.append(pl.col(src_name).cast(pl.Float64).alias(src_name))
+            
+        # Struct -> JSON String
+        elif isinstance(dt, pl.Struct):
+            exprs.append(
+                pl.col(src_name).map_elements(
+                    lambda x: json.dumps(x) if x else None, 
+                    return_dtype=pl.Utf8
+                ).alias(src_name)
+            )
+            
+        # Unknown/Object (LOBs, un-inferred Python Decimals/Dicts/Lists)
+        elif dt == pl.Object:
+            def _coerce_obj(val):
+                if hasattr(val, "read"): return val.read()
+                if hasattr(val, "as_integer_ratio") and not isinstance(val, (int, float)): return float(val)
+                if isinstance(val, dict): return json.dumps(val)
+                return val
+            exprs.append(
+                pl.col(src_name).map_elements(_coerce_obj, return_dtype=pl.Object).alias(src_name)
+            )
 
-            # LOB objects
-            if hasattr(val, "read"):
-                val = val.read()
+    if exprs:
+        df = df.with_columns(exprs)
+        
+    if rename_map:
+        df = df.rename(rename_map)
+        
+    # Keep only target columns ensuring they exist in the dataframe
+    final_cols = [c for c in target_cols if c in df.columns]
+    
+    # Return as list of standard python dictionaries
+    return df.select(final_cols).to_dicts()
 
-            # Decimal → float
-            if hasattr(val, "as_integer_ratio") and not isinstance(val, (int, float)):
-                val = float(val)
 
-            # Dict (JSONB) → string
-            if isinstance(val, dict):
-                val = json.dumps(val)
-
-            # Bool coercion for BOOL canonical
-            canonical = col.get("canonical_type", "")
-            if canonical == "BOOL" and isinstance(val, int):
-                val = bool(val)
-
-            # Remap source col name → target col name
-            if src_name != name:
-                del row[src_name]
-            row[name] = val
-    return rows
+def _handle_dead_letter(run_id: str, table_name: str, offset: int, rows: list[dict]):
+    import csv
+    dlq_dir = ROOT_DIR / "dlq" / run_id
+    dlq_dir.mkdir(parents=True, exist_ok=True)
+    out_file = dlq_dir / f"{table_name}_offset_{offset}.csv"
+    
+    if not rows:
+        return
+        
+    with open(out_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+    log.error("Wrote %d failed rows to Dead Letter Queue: %s", len(rows), out_file)
 
 
 def migrate_table(
@@ -114,6 +168,16 @@ def migrate_table(
     total_loaded = 0
     failures = 0
     offset = _load_checkpoint(run_id, target_table)
+    
+    from tenacity import retry, stop_after_attempt, wait_exponential
+    
+    @retry(
+        stop=stop_after_attempt(max_failures),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+        reraise=True
+    )
+    def load_with_retry(fqn, t_cols, r_data):
+        return target.bulk_load(fqn, t_cols, r_data)
 
     while True:
         try:
@@ -123,12 +187,7 @@ def migrate_table(
             )
         except Exception as e:
             log.error("Extract failed at offset %d: %s", offset, e)
-            failures += 1
-            if failures >= max_failures:
-                log.error("Max failures reached for %s — stopping", table)
-                break
-            offset += chunk_size
-            continue
+            raise RuntimeError(f"Extraction failed at offset {offset}") from e
 
         if not rows:
             log.info("No more rows at offset=%d — %s complete (%d rows)",
@@ -139,26 +198,26 @@ def migrate_table(
         target_cols = [c.get("target", c.get("source")) for c in columns]
 
         try:
-            loaded = target.bulk_load(fqn_target, target_cols, rows)
+            loaded = load_with_retry(fqn_target, target_cols, rows)
+            
+            # ❗ CRITICAL FIX: Only increment offset on success
             total_loaded += loaded
             offset += len(rows)
             _save_checkpoint(run_id, target_table, offset, total_loaded)
             log.info("  offset %d: %d rows loaded (total %d)",
                      offset, loaded, total_loaded)
+                     
         except Exception as e:
-            log.error("Load failed at offset %d: %s", offset, e)
+            log.error("Target load exhausted retries at offset %d: %s", offset, e)
             
-            # If the table is missing, don't keep trying and skipping offsets!
+            # Quick check for missing table vs bad row data
             err_msg = str(e).lower()
             if "doesn't exist" in err_msg or "not found" in err_msg or "1146" in err_msg:
-                log.error("Fatal error: Target table %s missing. Stopping migration for this table.", table)
-                break
-
-            failures += 1
-            if failures >= max_failures:
-                log.error("Max failures reached for %s — stopping", table)
-                break
-            offset += len(rows)
+                log.error("Fatal error: Target table %s missing.", table)
+            else:
+                _handle_dead_letter(run_id, target_table, offset, rows)
+                
+            raise RuntimeError(f"Migration aborted for {table} due to unrecoverable load error") from e
 
     if disable_fk:
         try:

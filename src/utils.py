@@ -33,7 +33,7 @@ def load_config(path: str | Path | None = None) -> dict:
     # Replace ${VAR} with environment variable values
     raw = re.sub(
         r"\$\{(\w+)\}",
-        lambda m: os.environ.get(m.group(1), m.group(0)),
+        lambda m: os.environ.get(m.group(1), ""),
         raw,
     )
     return yaml.safe_load(raw)
@@ -43,7 +43,31 @@ def generate_run_id() -> str:
     """Return a short, timestamped run identifier."""
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     short = uuid.uuid4().hex[:6]
-    return f"run-{ts}-{short}"
+    run_id = f"run-{ts}-{short}"
+    cleanup_old_runs(keep=10)
+    return run_id
+
+def cleanup_old_runs(keep: int = 10) -> None:
+    """Keep only the N most recent run_id directories in output folders."""
+    import shutil
+    dirs_to_clean = ["schemas", "stats", "mappings", "checkpoints", "ddl", "dlq", "reports"]
+    
+    run_ids = set()
+    for d in dirs_to_clean:
+        path = ROOT_DIR / d
+        if path.exists():
+            for child in path.iterdir():
+                if child.is_dir() and child.name.startswith("run-"):
+                    run_ids.add(child.name)
+                    
+    sorted_runs = sorted(list(run_ids), reverse=True)
+    runs_to_delete = sorted_runs[keep:]
+    
+    for run in runs_to_delete:
+        for d in dirs_to_clean:
+            target = ROOT_DIR / d / run
+            if target.exists() and target.is_dir():
+                shutil.rmtree(target, ignore_errors=True)
 
 
 def topological_sort(tables: list[dict]) -> list[dict]:

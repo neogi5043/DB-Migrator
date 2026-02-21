@@ -20,6 +20,7 @@ def extract_schema(
     source: SourceConnector,
     config: dict,
     run_id: str | None = None,
+    on_progress=None
 ) -> Path:
     """Extract full schema spec from the source database.
 
@@ -35,12 +36,16 @@ def extract_schema(
 
     tables_meta = source.list_tables(database, schemas)
     log.info("Found %d tables", len(tables_meta))
+    total_tables = len(tables_meta)
 
     tables = []
-    for t in tables_meta:
+    for i, t in enumerate(tables_meta):
         schema = t["schema"]
         name = t["name"]
         log.info("  ► %s.%s", schema, name)
+        
+        if on_progress:
+            on_progress(f"Extracting {schema}.{name}...", i, total_tables)
 
         columns = source.get_columns(database, schema, name)
         pk = source.get_primary_keys(database, schema, name)

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
     getConfig, getTables, getMapping, approveTable, approveAll as apiApproveAll,
-    runExtract, runPropose, runApplySchema, runMigrate, runValidate,
+    runExtract, runPropose, runApplySchema, runMigrate, runValidate, testConnection,
 } from "./api.js";
 import logoSrc from "../assests/unnamed.png";
 
@@ -225,11 +225,31 @@ const STEPS = [
 // target.engine, target.mysql.*, llm.provider (azure_openai), migration.*
 function ConfigStep({ config, setConfig, onNext }) {
     const [errors, setErrors] = useState({});
+    const [testStatus, setTestStatus] = useState({ source: null, target: null });
+
+    async function handleTest(side) {
+        setTestStatus(s => ({ ...s, [side]: "testing" }));
+        try {
+            const res = await testConnection(side, config);
+            setTestStatus(s => ({ ...s, [side]: res.status === "success" ? "success" : "error" }));
+        } catch (err) {
+            setTestStatus(s => ({ ...s, [side]: "error" }));
+        }
+    }
 
     function validate() {
         const e = {};
+        if (!config.sourceHost) e.sourceHost = "Required";
+        if (!config.sourcePort) e.sourcePort = "Required";
         if (!config.sourceDb) e.sourceDb = "Required";
+        if (!config.sourceUser) e.sourceUser = "Required";
+        if (!config.sourcePass) e.sourcePass = "Required";
+
+        if (!config.targetHost) e.targetHost = "Required";
+        if (!config.targetPort) e.targetPort = "Required";
         if (!config.targetDb) e.targetDb = "Required";
+        if (!config.targetUser) e.targetUser = "Required";
+        if (!config.targetPass) e.targetPass = "Required";
         return e;
     }
 
@@ -250,23 +270,28 @@ function ConfigStep({ config, setConfig, onNext }) {
                             onChange={v => setConfig(c => ({ ...c, sourceEngine: v }))} />
                     </Field>
                     <Field label="Host">
-                        <Input value={config.sourceHost} onChange={v => setConfig(c => ({ ...c, sourceHost: v }))} placeholder="db-host.postgres.database.azure.com" mono />
+                        <Input value={config.sourceHost} onChange={v => setConfig(c => ({ ...c, sourceHost: v }))} placeholder="db-host.postgres.database.azure.com" mono error={errors.sourceHost} />
                     </Field>
                     <div style={{ display: "flex", gap: 10 }}>
                         <Field label="Port" style={{ flex: "0 0 90px" }}>
-                            <Input value={config.sourcePort} onChange={v => setConfig(c => ({ ...c, sourcePort: v }))} placeholder="5432" mono />
+                            <Input value={config.sourcePort} onChange={v => setConfig(c => ({ ...c, sourcePort: v }))} placeholder="eg:5432" mono error={errors.sourcePort} />
                         </Field>
                         <Field label="Database" style={{ flex: 1 }}>
-                            <Input value={config.sourceDb} onChange={v => setConfig(c => ({ ...c, sourceDb: v }))} placeholder="Bi_doctor_db" mono error={errors.sourceDb} />
+                            <Input value={config.sourceDb} onChange={v => setConfig(c => ({ ...c, sourceDb: v }))} placeholder="example_db" mono error={errors.sourceDb} />
                         </Field>
                     </div>
                     <div style={{ display: "flex", gap: 10 }}>
                         <Field label="User" style={{ flex: 1 }}>
-                            <Input value={config.sourceUser} onChange={v => setConfig(c => ({ ...c, sourceUser: v }))} placeholder="admin" mono />
+                            <Input value={config.sourceUser} onChange={v => setConfig(c => ({ ...c, sourceUser: v }))} placeholder="admin" mono error={errors.sourceUser} />
                         </Field>
                         <Field label="Password" style={{ flex: 1 }}>
-                            <Input value={config.sourcePass} onChange={v => setConfig(c => ({ ...c, sourcePass: v }))} placeholder="••••••" mono password />
+                            <Input value={config.sourcePass} onChange={v => setConfig(c => ({ ...c, sourcePass: v }))} placeholder="••••••" mono password error={errors.sourcePass} />
                         </Field>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <button onClick={() => handleTest("source")} type="button" style={smallBtnStyle(testStatus.source === "success" ? C.green : testStatus.source === "error" ? C.red : C.cyan)}>
+                            {testStatus.source === "testing" ? "TESTING..." : testStatus.source === "success" ? "SUCCESS" : testStatus.source === "error" ? "FAILED" : "TEST CONNECTION"}
+                        </button>
                     </div>
                 </div>
             </Panel>
@@ -287,27 +312,40 @@ function ConfigStep({ config, setConfig, onNext }) {
                             onChange={v => setConfig(c => ({ ...c, targetEngine: v }))} />
                     </Field>
                     <Field label="Host">
-                        <Input value={config.targetHost} onChange={v => setConfig(c => ({ ...c, targetHost: v }))} placeholder="mysql-host.aivencloud.com" mono />
+                        <Input value={config.targetHost} onChange={v => setConfig(c => ({ ...c, targetHost: v }))} placeholder="mysql-host.aivencloud.com" mono error={errors.targetHost} />
                     </Field>
                     <div style={{ display: "flex", gap: 10 }}>
                         <Field label="Port" style={{ flex: "0 0 90px" }}>
-                            <Input value={config.targetPort} onChange={v => setConfig(c => ({ ...c, targetPort: v }))} placeholder="3306" mono />
+                            <Input value={config.targetPort} onChange={v => setConfig(c => ({ ...c, targetPort: v }))} placeholder="eg:3306" mono error={errors.targetPort} />
                         </Field>
                         <Field label="Database / Schema" style={{ flex: 1 }}>
-                            <Input value={config.targetDb} onChange={v => setConfig(c => ({ ...c, targetDb: v }))} placeholder="Bi_doctor_db" mono error={errors.targetDb} />
+                            <Input value={config.targetDb} onChange={v => setConfig(c => ({ ...c, targetDb: v }))} placeholder="example_db" mono error={errors.targetDb} />
                         </Field>
                     </div>
                     <div style={{ display: "flex", gap: 10 }}>
                         <Field label="User" style={{ flex: 1 }}>
-                            <Input value={config.targetUser} onChange={v => setConfig(c => ({ ...c, targetUser: v }))} placeholder="admin" mono />
+                            <Input value={config.targetUser} onChange={v => setConfig(c => ({ ...c, targetUser: v }))} placeholder="admin" mono error={errors.targetUser} />
                         </Field>
                         <Field label="Password" style={{ flex: 1 }}>
-                            <Input value={config.targetPass} onChange={v => setConfig(c => ({ ...c, targetPass: v }))} placeholder="••••••" mono password />
+                            <Input value={config.targetPass} onChange={v => setConfig(c => ({ ...c, targetPass: v }))} placeholder="••••••" mono password error={errors.targetPass} />
                         </Field>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <button onClick={() => handleTest("target")} type="button" style={smallBtnStyle(testStatus.target === "success" ? C.green : testStatus.target === "error" ? C.red : C.cyan)}>
+                            {testStatus.target === "testing" ? "TESTING..." : testStatus.target === "success" ? "SUCCESS" : testStatus.target === "error" ? "FAILED" : "TEST CONNECTION"}
+                        </button>
                     </div>
                 </div>
                 <div style={{ padding: "0 20px 20px" }}>
-                    <button onClick={handleNext} style={btnStyle(C.cyan)}>
+                    <button
+                        onClick={handleNext}
+                        disabled={testStatus.source !== "success" || testStatus.target !== "success"}
+                        style={{
+                            ...btnStyle(testStatus.source === "success" && testStatus.target === "success" ? C.cyan : C.text2),
+                            opacity: (testStatus.source === "success" && testStatus.target === "success") ? 1 : 0.5,
+                            cursor: (testStatus.source === "success" && testStatus.target === "success") ? "pointer" : "not-allowed"
+                        }}
+                    >
                         <span style={{ fontFamily: G.fontMono, fontSize: 12, fontWeight: 600 }}>SAVE & CONTINUE</span>
                     </button>
                 </div>
@@ -326,13 +364,19 @@ function ExtractStep({ config, onNext }) {
 
     async function run() {
         setPhase("running"); setLog([]); setProgress(0); setStats(null);
-        let count = 0;
-        await runExtract((ev) => {
+        await runExtract(config, (ev) => {
             if (ev.type === "log") {
-                count++;
                 setLog(l => [...l, ev.msg]);
-                setProgress(Math.min(95, count * 15));
                 if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+            }
+            if (ev.type === "progress") {
+                if (ev.total > 0) {
+                    setProgress(Math.floor((ev.done / ev.total) * 100));
+                }
+                if (ev.msg) {
+                    setLog(l => [...l, ev.msg]);
+                    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+                }
             }
             if (ev.type === "done") {
                 setStats({ tables: ev.tables, columns: ev.columns });
@@ -416,7 +460,7 @@ function ProposeStep({ config, onNext }) {
 
     async function run() {
         setPhase("running"); setLog([]);
-        await runPropose((ev) => {
+        await runPropose(config, (ev) => {
             if (ev.type === "log") setLog(l => [...l, ev.msg]);
             if (ev.type === "progress") setProgress(ev);
             if (ev.type === "done") setPhase("done");
@@ -607,10 +651,11 @@ function ReviewStep({ onNext }) {
 }
 
 // ─── Migrate Step ───────────────────────────────────────────────────────
-function MigrateStep({ config, onNext }) {
+function MigrateStep({ config, onNext, onHome }) {
     const [phase, setPhase] = useState("idle");
     const [log, setLog] = useState([]);
     const [results, setResults] = useState([]);
+    const [runId, setRunId] = useState(null);
     const logRef = useRef(null);
 
     async function run() {
@@ -618,7 +663,7 @@ function MigrateStep({ config, onNext }) {
 
         // First apply schema
         setLog(l => [...l, "Applying schema to target MySQL..."]);
-        await runApplySchema((ev) => {
+        await runApplySchema(config, (ev) => {
             if (ev.type === "log") {
                 setLog(l => [...l, ev.msg]);
                 if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
@@ -627,13 +672,16 @@ function MigrateStep({ config, onNext }) {
 
         // Then migrate data
         setLog(l => [...l, "Starting data migration..."]);
-        await runMigrate((ev) => {
+        await runMigrate(config, (ev) => {
             if (ev.type === "log") {
                 setLog(l => [...l, ev.msg]);
                 if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
             }
             if (ev.type === "table_done") setResults(r => [...r, ev]);
-            if (ev.type === "done") setPhase("done");
+            if (ev.type === "done") {
+                setPhase("done");
+                if (ev.run_id) setRunId(ev.run_id);
+            }
             if (ev.type === "error") {
                 setLog(l => [...l, `✗ ERROR: ${ev.msg}`]);
                 setPhase("done");
@@ -661,7 +709,7 @@ function MigrateStep({ config, onNext }) {
                     )}
                 </div>
                 <div style={{ padding: "8px 16px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
-                    <button onClick={run} disabled={phase !== "idle"} style={btnStyle(C.cyan)}>
+                    <button onClick={phase === "done" ? onHome : run} disabled={phase === "running"} style={btnStyle(C.cyan)}>
                         <Mono size={12} style={{ fontWeight: 600 }}>
                             {phase === "idle" ? "START MIGRATION" : phase === "done" ? "COMPLETE ✓" : "MIGRATING…"}
                         </Mono>
@@ -669,6 +717,11 @@ function MigrateStep({ config, onNext }) {
                     {phase === "done" && (
                         <button onClick={onNext} style={btnStyle(C.green)}>
                             <Mono size={12} style={{ fontWeight: 600 }}>VALIDATE →</Mono>
+                        </button>
+                    )}
+                    {results.some(r => r.failures > 0) && runId && (
+                        <button onClick={() => window.open(`/api/dlq/${runId}/download`, '_blank')} style={{ ...btnStyle(C.amber), marginTop: 8 }}>
+                            <Mono size={12} style={{ fontWeight: 600 }}>DOWNLOAD EXCEPTION DATA</Mono>
                         </button>
                     )}
                 </div>
@@ -682,12 +735,13 @@ function MigrateStep({ config, onNext }) {
                             {results.map(r => (
                                 <div key={r.table} style={{
                                     display: "flex", alignItems: "center", gap: 12, padding: "7px 12px",
-                                    borderRadius: 6, background: C.bg2, border: `1px solid ${C.border}`,
+                                    borderRadius: 6, background: C.bg2, border: `1px solid ${r.failures > 0 ? C.amber + "60" : C.border}`,
                                 }}>
-                                    <StatusDot status="approved" />
-                                    <Mono size={12} style={{ flex: 1 }}>{r.table}</Mono>
-                                    <Mono size={11} color={C.green}>{(r.rows || 0).toLocaleString()} rows</Mono>
-                                    {r.failures > 0 && <Badge label={`${r.failures} fail`} color={C.red} />}
+                                    <StatusDot status={r.failures > 0 ? "error" : "approved"} />
+                                    <Mono size={12} style={{ flex: 1, color: r.failures > 0 ? C.amber : C.text0 }}>{r.table}</Mono>
+                                    <Mono size={11} color={r.failures > 0 ? C.amber : C.green}>{(r.rows || 0).toLocaleString()} rows</Mono>
+                                    {r.failures > 0 && <Badge label={`⚠️ SENT TO DLQ`} color={C.red} />}
+                                    {r.failures > 0 && <Mono size={10} color={C.red}>Check /dlq folder</Mono>}
                                 </div>
                             ))}
                         </div>
@@ -715,7 +769,7 @@ function MigrateStep({ config, onNext }) {
 }
 
 // ─── Validate Step ──────────────────────────────────────────────────────
-function ValidateStep() {
+function ValidateStep({ config }) {
     const [phase, setPhase] = useState("idle");
     const [results, setResults] = useState([]);
     const [log, setLog] = useState([]);
@@ -723,7 +777,7 @@ function ValidateStep() {
 
     async function run() {
         setPhase("running"); setResults([]); setLog([]);
-        await runValidate((ev) => {
+        await runValidate(config, (ev) => {
             if (ev.type === "log") setLog(l => [...l, ev.msg]);
             if (ev.type === "table_result") setResults(r => [...r, ev.result]);
             if (ev.type === "done") {
@@ -815,8 +869,56 @@ function ValidateStep() {
     );
 }
 
+// ─── Login Screen ─────────────────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+    const [user, setUser] = useState("");
+    const [pwd, setPwd] = useState("");
+    const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        setLoading(true);
+        const token = "Basic " + btoa(`${user.trim()}:${pwd.trim()}`);
+        localStorage.setItem("dbAdminAuth", token);
+        try {
+            await getConfig();
+            onLogin(token);
+        } catch (err) {
+            setError(true);
+            localStorage.removeItem("dbAdminAuth");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Panel style={{ width: 360, animation: "slideIn 0.3s ease" }}>
+                <PanelHeader title="RESTRICTED ACCESS" />
+                <form onSubmit={handleLogin} style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+                    <div style={{ textAlign: "center", marginBottom: 8 }}>
+                        <img src={logoSrc} alt="Exavalu" style={{ height: 40 }} />
+                    </div>
+                    <Field label="Admin Username">
+                        <Input value={user} onChange={v => { setUser(v); setError(false); }} placeholder="admin" error={error} disabled={loading} />
+                    </Field>
+                    <Field label="Admin Password">
+                        <Input password value={pwd} onChange={v => { setPwd(v); setError(false); }} placeholder="••••••••" error={error} disabled={loading} />
+                    </Field>
+                    {error && <Mono size={10} color={C.red}>Invalid Credentials. Access Denied.</Mono>}
+                    <button type="submit" disabled={loading} style={{ ...btnStyle(C.cyan), opacity: loading ? 0.5 : 1 }}>
+                        {loading ? "AUTHENTICATING..." : "UNLOCK PIPELINE"}
+                    </button>
+                </form>
+            </Panel>
+        </div>
+    );
+}
+
 // ─── App ────────────────────────────────────────────────────────────────
 export default function App() {
+    const [auth, setAuth] = useState(() => localStorage.getItem("dbAdminAuth"));
     const [step, setStep] = useState(0);
     const [config, setConfig] = useState({
         sourceEngine: "postgres", sourceHost: "", sourcePort: "5432",
@@ -829,6 +931,8 @@ export default function App() {
 
     useEffect(() => {
         injectStyles();
+        if (!auth) return;
+
         // Load real config from backend's config.yaml
         getConfig().then(cfg => {
             if (cfg?.source) {
@@ -840,14 +944,14 @@ export default function App() {
                     ...c,
                     sourceEngine: srcEngine,
                     sourceHost: srcCreds.host || "",
-                    sourcePort: String(srcCreds.port || "5432"),
-                    sourceDb: cfg.source.database || srcCreds.database || "",
+                    sourcePort: srcCreds.port ? String(srcCreds.port) : "",
+                    sourceDb: srcCreds.database || "",
                     sourceUser: srcCreds.user || "",
                     sourcePass: srcCreds.password || "",
                     targetEngine: tgtEngine,
                     targetHost: tgtCreds.host || "",
-                    targetPort: String(tgtCreds.port || "3306"),
-                    targetDb: cfg.target?.schema || tgtCreds.database || "",
+                    targetPort: tgtCreds.port ? String(tgtCreds.port) : "",
+                    targetDb: tgtCreds.database || "",
                     targetUser: tgtCreds.user || "",
                     targetPass: tgtCreds.password || "",
                     llmProvider: cfg.llm?.provider || "azure_openai",
@@ -865,9 +969,11 @@ export default function App() {
         <ExtractStep config={config} onNext={() => setStep(2)} />,
         <ProposeStep config={config} onNext={() => setStep(3)} />,
         <ReviewStep onNext={() => setStep(4)} />,
-        <MigrateStep config={config} onNext={() => setStep(5)} />,
-        <ValidateStep />,
+        <MigrateStep config={config} onNext={() => setStep(5)} onHome={() => setStep(0)} />,
+        <ValidateStep config={config} />,
     ];
+
+    if (!auth) return <LoginScreen onLogin={setAuth} />;
 
     return (
         <div style={{ minHeight: "100vh", background: C.bg0, display: "flex", flexDirection: "column" }}>
@@ -881,7 +987,10 @@ export default function App() {
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                     <img src={logoSrc} alt="Exavalu" style={{ height: 35 }} />
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    position: "absolute", left: "50%", transform: "translateX(-50%)"
+                }}>
                     <div style={{
                         padding: "5px 12px", borderRadius: 4,
                         background: ENGINE_COLORS[config.sourceEngine] + "18",
@@ -910,8 +1019,6 @@ export default function App() {
                         fontSize: 11, fontWeight: 600, letterSpacing: "0.05em",
                         transition: "all 0.15s",
                     }}>HOME</button>
-                    <Badge label={config.sourceDb || "Bi_doctor_db"} color={C.cyan} />
-                    <Badge label="v1.0" color={C.text2} />
                 </div>
             </div>
 

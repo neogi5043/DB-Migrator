@@ -9,7 +9,14 @@ build/
 dist/
 *.egg-info/
 app/frontend/node_modules/
-
+reports/
+schemas/
+stats/
+mappings/
+dlq/
+ddl/
+checkpoints/
+run_state.json
 # Environment Variables
 .env
 
