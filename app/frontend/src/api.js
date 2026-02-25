@@ -10,7 +10,7 @@ export async function fetchJSON(path) {
     const headers = {};
     const auth = localStorage.getItem("dbAdminAuth");
     if (auth) headers["Authorization"] = auth;
-    const res = await fetch(`${BASE}${path}`, { headers });
+    const res = await fetch(`${BASE}${path}`, { headers, credentials: "include" });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res.json();
 }
@@ -23,6 +23,7 @@ export async function postJSON(path, body = {}) {
     const res = await fetch(`${BASE}${path}`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -48,7 +49,7 @@ export async function streamSSE(path, body, onEvent) {
         req.headers["Content-Type"] = "application/json";
         req.body = JSON.stringify(body);
     }
-    const res = await fetch(`${BASE}${path}`, req);
+    const res = await fetch(`${BASE}${path}`, { ...req, credentials: "include" });
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
@@ -93,6 +94,7 @@ export async function putJSON(path, body = {}) {
     const res = await fetch(`${BASE}${path}`, {
         method: "PUT",
         headers,
+        credentials: "include",
         body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);

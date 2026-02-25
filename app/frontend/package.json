@@ -9,9 +9,10 @@
         "preview": "node node_modules/vite/bin/vite.js preview"
     },
     "dependencies": {
+        "@vitejs/plugin-react": "^4.3.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "@vitejs/plugin-react": "^4.3.0",
+        "react-router-dom": "^7.13.1",
         "vite": "^6.0.0"
     }
 }

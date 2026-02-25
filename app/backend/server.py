@@ -25,6 +25,16 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import uvicorn
 
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
+
+def hash_password(password):
+    return pwd_context.hash(password)
+
 # ── Ensure project root is importable ──────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -43,32 +53,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+from fastapi.responses import JSONResponse
+
+SESSION_COOKIE = "db_migrator_session"
 
 @app.middleware("http")
-async def basic_auth_middleware(request, call_next):
-    if request.url.path.startswith("/api"):
-        auth = request.headers.get("Authorization")
-        if not auth or not auth.startswith("Basic "):
-            from fastapi.responses import JSONResponse
-            return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
-        try:
-            decoded = base64.b64decode(auth[6:]).decode("utf-8")
-            username, password = decoded.split(":", 1)
-            
-            from dotenv import dotenv_values
-            env_vars = {}
-            if (PROJECT_ROOT / ".env").exists():
-                env_vars = dotenv_values(PROJECT_ROOT / ".env")
-                
-            valid_user = env_vars.get("ADMIN_USERNAME") or os.environ.get("ADMIN_USERNAME", "admin")
-            valid_pass = env_vars.get("ADMIN_PASSWORD") or os.environ.get("ADMIN_PASSWORD", "admin123")
-            
-            if not secrets.compare_digest(username, valid_user) or not secrets.compare_digest(password, valid_pass):
-                from fastapi.responses import JSONResponse
-                return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
-        except Exception:
-            from fastapi.responses import JSONResponse
-            return JSONResponse(status_code=401, content={"detail": "Unauthorized"}, headers={"WWW-Authenticate": "CustomBasic"})
+async def session_middleware(request: Request, call_next):
+    if request.url.path.startswith("/api") and request.url.path not in ["/api/login"]:
+        session = request.cookies.get(SESSION_COOKIE)
+        if not session:
+            return JSONResponse(status_code=401, content={"detail": "Not authenticated"})
     return await call_next(request)
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -178,6 +172,69 @@ class ConfigPayload(BaseModel):
     disableFk: bool = True
 
 
+from pydantic import BaseModel
+import psycopg2
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# ── Routes: Authentication ───────────────────────────────────────────────
+@app.post("/api/login")
+def login(req: LoginRequest):
+    try:
+        conn = psycopg2.connect(
+            host="pg-b970e07-exavalu-5c0c.l.aivencloud.com",
+            database="Bi_doctor_db",
+            user="avnadmin",
+            password=os.getenv("DB_PASSWORD"),
+            port=20301,
+            sslmode="require"
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT id, password_hash FROM app_users WHERE username=%s AND is_active=TRUE", (req.username,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        user_id, password_hash = user
+
+        if not verify_password(req.password, password_hash):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        response = JSONResponse({"status": "success"})
+        response.set_cookie(
+            key=SESSION_COOKIE,
+            value=str(user_id),
+            httponly=True,
+            secure=False,  # True in production HTTPS
+            samesite="lax",
+            max_age=60 * 60 * 4
+        )
+        return response
+
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    
+# --- Logout route to clear the session cookie    
+@app.post("/api/logout")
+def logout():
+    response = JSONResponse({"status": "logged_out"})
+    response.delete_cookie(SESSION_COOKIE)
+    return response
+
+@app.get("/api/me")
+def get_me(request: Request):
+    user_id = request.cookies.get(SESSION_COOKIE)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    return {"user_id": user_id}
 # ── Routes: Config ─────────────────────────────────────────────────────────
 
 @app.get("/api/config")
