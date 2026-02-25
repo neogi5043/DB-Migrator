@@ -85,6 +85,22 @@ export const getViews = () => fetchJSON("/api/views");
 export const approveTable = (table) => postJSON(`/api/approve/${table}`);
 export const approveAll = () => postJSON("/api/approve-all");
 
+export async function putJSON(path, body = {}) {
+    const headers = { "Content-Type": "application/json" };
+    const auth = localStorage.getItem("dbAdminAuth");
+    if (auth) headers["Authorization"] = auth;
+
+    const res = await fetch(`${BASE}${path}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    return res.json();
+}
+
+export const saveMapping = (table, mapping) => putJSON(`/api/mapping/${table}`, mapping);
+
 export const runExtract = (body, onEvent) => streamSSE("/api/extract", body, onEvent);
 export const runPropose = (body, onEvent) => streamSSE("/api/propose", body, onEvent);
 export const runApplySchema = (body, onEvent) => streamSSE("/api/apply-schema", body, onEvent);

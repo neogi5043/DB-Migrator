@@ -19,7 +19,7 @@ from pathlib import Path
 from contextlib import redirect_stdout, redirect_stderr
 from io import StringIO
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -245,6 +245,26 @@ def get_mapping(table: str):
             mapping = json.loads(f.read_text(encoding="utf-8"))
             return {"status": status_dir, "mapping": mapping}
     raise HTTPException(404, f"Mapping not found for table {table} in run {run_id}")
+
+
+@app.put("/api/mapping/{table}")
+async def save_mapping(table: str, request: Request):
+    """Save user edits to the draft mapping JSON."""
+    run_id = _get_active_run_id(required=True)
+    body = await request.json()
+
+    # Write edits back to draft (or approved if already approved)
+    for status_dir in ["draft", "approved"]:
+        f = ROOT_DIR / "mappings" / run_id / status_dir / f"{table}.json"
+        if f.exists():
+            f.write_text(json.dumps(body, indent=2, ensure_ascii=False), encoding="utf-8")
+            return {"status": "saved", "table": table, "location": status_dir}
+
+    # If neither exists, create in draft
+    draft_path = ROOT_DIR / "mappings" / run_id / "draft" / f"{table}.json"
+    draft_path.parent.mkdir(parents=True, exist_ok=True)
+    draft_path.write_text(json.dumps(body, indent=2, ensure_ascii=False), encoding="utf-8")
+    return {"status": "saved", "table": table, "location": "draft"}
 
 
 @app.post("/api/approve/{table}")

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
     getConfig, getTables, getMapping, approveTable, approveAll as apiApproveAll,
     runExtract, runPropose, runApplySchema, runMigrate, runValidate, testConnection,
+    saveMapping,
 } from "./api.js";
 import logoSrc from "../assests/unnamed.png";
 
@@ -531,7 +532,11 @@ function ReviewStep({ onNext }) {
     const [tables, setTables] = useState([]);
     const [selected, setSelected] = useState("");
     const [columns, setColumns] = useState([]);
+    const [fullMapping, setFullMapping] = useState(null);
+    const [dirty, setDirty] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [targetTable, setTargetTable] = useState("");
 
     useEffect(() => {
         getTables().then(data => {
@@ -544,22 +549,54 @@ function ReviewStep({ onNext }) {
     useEffect(() => {
         if (!selected) return;
         getMapping(selected).then(data => {
-            setColumns(data.mapping?.columns || []);
-        }).catch(() => setColumns([]));
+            const m = data.mapping || {};
+            setFullMapping(m);
+            setColumns(m.columns || []);
+            setTargetTable(m.target_table || "");
+            setDirty(false);
+        }).catch(() => { setColumns([]); setFullMapping(null); });
     }, [selected]);
 
+    function updateCol(idx, field, value) {
+        setColumns(cols => cols.map((c, i) => i === idx ? { ...c, [field]: value } : c));
+        setDirty(true);
+    }
+
+    function updateTargetTable(value) {
+        setTargetTable(value);
+        setDirty(true);
+    }
+
+    async function handleSave() {
+        if (!fullMapping) return;
+        setSaving(true);
+        const updated = { ...fullMapping, target_table: targetTable, columns };
+        await saveMapping(selected, updated);
+        setFullMapping(updated);
+        setDirty(false);
+        setSaving(false);
+    }
+
     async function approve(name) {
+        if (dirty) await handleSave();
         await approveTable(name);
         setTables(ts => ts.map(t => t.name === name ? { ...t, status: "approved" } : t));
     }
 
     async function handleApproveAll() {
+        if (dirty) await handleSave();
         await apiApproveAll();
         setTables(ts => ts.map(t => ({ ...t, status: "approved" })));
     }
 
     const allApproved = tables.length > 0 && tables.every(t => t.status === "approved");
     const selectedTable = tables.find(t => t.name === selected);
+
+    const editInputStyle = {
+        background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 4,
+        color: C.text0, fontFamily: G.fontMono, fontSize: 12, padding: "4px 8px",
+        width: "100%", outline: "none",
+    };
 
     if (loading) return <Panel style={{ padding: 40, textAlign: "center" }}><Mono size={14} color={C.text2}>Loading tables…</Mono></Panel>;
     if (tables.length === 0) return <Panel style={{ padding: 40, textAlign: "center" }}><Mono size={14} color={C.amber}>No mappings found. Run Extract → LLM Map first.</Mono></Panel>;
@@ -603,12 +640,27 @@ function ReviewStep({ onNext }) {
             <Panel style={{ flex: 1 }}>
                 <PanelHeader title={`Mapping: ${selected}`} right={
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {dirty && <Badge label="MODIFIED" color={C.amber} />}
                         <Badge label={selectedTable?.status || "—"} color={selectedTable?.status === "approved" ? C.green : C.amber} />
+                        {dirty && (
+                            <button onClick={handleSave} disabled={saving} style={smallBtnStyle(C.cyan)}>
+                                {saving ? "SAVING..." : "SAVE"}
+                            </button>
+                        )}
                         {selectedTable?.status !== "approved" && (
-                            <button onClick={() => approve(selected)} style={smallBtnStyle(C.green)}>✓ APPROVE</button>
+                            <button onClick={() => approve(selected)} style={smallBtnStyle(C.green)}>APPROVE</button>
                         )}
                     </div>
                 } />
+                {/* Editable target table name */}
+                <div style={{ padding: "12px 14px 0", display: "flex", alignItems: "center", gap: 10 }}>
+                    <Mono size={10} color={C.text2} style={{ textTransform: "uppercase", letterSpacing: "0.06em", minWidth: 90 }}>Target Table</Mono>
+                    <input
+                        value={targetTable}
+                        onChange={e => updateTargetTable(e.target.value)}
+                        style={{ ...editInputStyle, maxWidth: 350 }}
+                    />
+                </div>
                 <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                         <thead>
@@ -632,8 +684,12 @@ function ReviewStep({ onNext }) {
                                     <td style={{ padding: "9px 14px" }}><Mono size={12} color={C.cyan}>{col.source}</Mono></td>
                                     <td style={{ padding: "9px 14px" }}><Mono size={11} color={C.text2}>{col.source_type_raw}</Mono></td>
                                     <td style={{ padding: "9px 14px" }}><Badge label={col.canonical_type} color={C.purple} /></td>
-                                    <td style={{ padding: "9px 14px" }}><Mono size={12} color={C.text0}>{col.target}</Mono></td>
-                                    <td style={{ padding: "9px 14px" }}><Mono size={11} color={C.green}>{col.target_type}</Mono></td>
+                                    <td style={{ padding: "5px 10px" }}>
+                                        <input value={col.target} onChange={e => updateCol(i, "target", e.target.value)} style={editInputStyle} />
+                                    </td>
+                                    <td style={{ padding: "5px 10px" }}>
+                                        <input value={col.target_type} onChange={e => updateCol(i, "target_type", e.target.value)} style={editInputStyle} />
+                                    </td>
                                     <td style={{ padding: "9px 14px" }}>{col.role && <Badge label={col.role} color={C.amber} />}</td>
                                 </tr>
                             ))}
