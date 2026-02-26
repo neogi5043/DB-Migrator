@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 import logoSrc from "../../assests/unnamed.png";
 
 const C = {
@@ -17,7 +17,13 @@ function LoginScreen() {
     const [pwd, setPwd] = useState("");
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
-
+     useEffect(() => {
+        document.body.style.margin = "0";
+        document.body.style.padding = "0";
+        document.documentElement.style.margin = "0";
+        document.documentElement.style.padding = "0";
+        document.body.style.background = C.bg0;
+    }, []);
     async function handleLogin(e) {
         e.preventDefault();
         setLoading(true);
@@ -69,11 +75,12 @@ function LoginScreen() {
                         borderBottom: `1px solid ${C.border}`,
                         background: C.bg2,
                         color: C.text0,
-                        fontSize: 12,
+                        fontSize: 15,
                         letterSpacing: "0.08em",
+                        textAlign: "center",
                     }}
                 >
-                    RESTRICTED ACCESS
+                    Login 
                 </div>
 
                 <form
