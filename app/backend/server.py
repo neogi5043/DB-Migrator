@@ -26,6 +26,10 @@ from pydantic import BaseModel
 import uvicorn
 
 from passlib.context import CryptContext
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -48,7 +52,7 @@ log = logging.getLogger(__name__)
 app = FastAPI(title="DB Migration API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -192,7 +196,7 @@ def login(req: LoginRequest):
             sslmode="require"
         )
         cur = conn.cursor()
-        cur.execute("SELECT id, password_hash FROM app_users WHERE username=%s AND is_active=TRUE", (req.username,))
+        cur.execute("SELECT id, username, password_hash FROM app_users WHERE username=%s AND is_active=TRUE", (req.username,))
         user = cur.fetchone()
         cur.close()
         conn.close()
@@ -200,17 +204,30 @@ def login(req: LoginRequest):
         if not user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        user_id, password_hash = user
+        user_id, username, password_hash = user
 
         if not verify_password(req.password, password_hash):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        response = JSONResponse({"status": "success"})
+        response = JSONResponse({
+            "status": "success",
+            "user_id": user_id,
+            "username": username
+            })
         response.set_cookie(
             key=SESSION_COOKIE,
             value=str(user_id),
             httponly=True,
             secure=False,  # True in production HTTPS
+            samesite="lax",
+            max_age=60 * 60 * 4
+        )
+        # Username cookie (frontend display)
+        response.set_cookie(
+            key="username",
+            value=username,
+            httponly=False,   # frontend can read
+            secure=False,
             samesite="lax",
             max_age=60 * 60 * 4
         )
@@ -226,15 +243,17 @@ def login(req: LoginRequest):
 def logout():
     response = JSONResponse({"status": "logged_out"})
     response.delete_cookie(SESSION_COOKIE)
+    response.delete_cookie("username")
     return response
 
 @app.get("/api/me")
 def get_me(request: Request):
     user_id = request.cookies.get(SESSION_COOKIE)
+    username = request.cookies.get("username")
     if not user_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    return {"user_id": user_id}
+    return {"user_id": user_id, "username": username}
 # ── Routes: Config ─────────────────────────────────────────────────────────
 
 @app.get("/api/config")

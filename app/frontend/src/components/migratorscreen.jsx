@@ -939,7 +939,7 @@ function MigratorScreen() {
         chunkSize: "5000", disableFk: true,
     });
     const [showProfile, setShowProfile] = useState(false);
-    const [username, setUsername] = useState("Admin"); // You can later fetch from backend
+    const [username, setUsername] = useState(""); // You can later fetch from backend
     // useEffect(() => {
     //     function handleClickOutside(e) {
     //         if (!e.target.closest(".profile-area")) {
@@ -952,8 +952,19 @@ function MigratorScreen() {
 
     useEffect(() => {
         injectStyles();
-        // if (!auth) return;
-
+        fetch("/api/me", { credentials: "include" })
+        .then(res => {
+            if (!res.ok) {
+                window.location.href = "/";
+                return;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data?.username) {
+                setUsername(data.username);
+            }
+        });
         // Load real config from backend's config.yaml
         getConfig().then(cfg => {
             if (cfg?.source) {
@@ -984,7 +995,18 @@ function MigratorScreen() {
             }
         }).catch(() => { });
     }, []);
+    useEffect(() => {
+        function syncLogout(event) {
+            if (event.key === "logout") {
+                window.location.href = "/";
+            }
+        }
 
+        window.addEventListener("storage", syncLogout);
+
+        return () => window.removeEventListener("storage", syncLogout);
+    }, []);
+    
     const stepComponents = [
         <ConfigStep config={config} setConfig={setConfig} onNext={() => setStep(1)} />,
         <ExtractStep config={config} onNext={() => setStep(2)} />,
@@ -1108,6 +1130,7 @@ function MigratorScreen() {
                                         method: "POST",
                                         credentials: "include"
                                     });
+                                    localStorage.setItem("logout", Date.now());
                                     window.location.href = "/";
                                     // setAuth(false);
                                 }}

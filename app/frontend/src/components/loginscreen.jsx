@@ -35,9 +35,9 @@ function LoginScreen() {
             });
 
             if (!res.ok) throw new Error("Invalid");
-
+            console.log(res); 
             window.location.href = "/migrator";
-        } catch {
+        } catch (err) {
             setError(true);
         } finally {
             setLoading(false);
